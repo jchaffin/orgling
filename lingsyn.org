@@ -1,0 +1,79 @@
+#+TITLE: Typeset Linguistics Documents in Org Mode
+
+* Class Description
+
+The =lingsyn= LaTeX class provides some common packages for writing
+Linguistics documents in org-mode and exporting to PDF. 
+
+At the moment, the =lingsyn= class is designed for typesetting
+documents in the style and format of the Ling120B Syntax course I'm
+taking at UCLA. As such, the current implementation really just provides
+a minimal template for a singular publishing format. 
+
+Unless you are enrolled in Syntax I with Ethan Poole and want to do
+your homework in LaTeX, it's highly unlikely this package will fit
+your typesetting needs.
+
+Ultimately, the goal of this project is to provide a robust set of
+tools and libraries which make the process of composing, previewing,
+and exporting [[https://en.wikibooks.org/wiki/LaTeX/Linguistics][LaTeX/Linguistics]] documents as seamless as
+possible. This would include:
+
+- Extend =org-preview-latex-fragment= to support inline typesetting of
+  tree structures in org-mode buffers.
+- Provide auto-indentation and "prettified" symbol mappings for
+  parameters inside linguistics based LaTeX environments.
+- Support for exporting linguistics environments in org-mode syntax
+  (as opposed to LaTeX export blocks) .
+
+
+* Included Packages
+- [[https://ctan.org/pkg/forest?lang=en][forest]] :: Draw tree structures with PGF/TikZ
+- [[https://ctan.org/pkg/gb4e][gb4e]] :: Enumerated examples and glossing
+- [[https://ctan.org/pkg/leipzig?lang=en][leipzig]] :: Glossing abbreviations
+- [[https://ctan.org/pkg/tipa][tipa]] :: Fonts and macros for IPA typesetting
+- [[https://ctan.org/pkg/linguex][linguex]] :: Formatting Linguistics examples
+- [[https://ctan.org/pkg/phonrule][phonrule]] :: Typesetting phonological rules and features
+
+* Installation
+
+In order to make the class available outside the project directory, it
+has to be added to a directory where the TeX engine knows to look.
+
+*** User Install
+I used the following commands to install the =lingsyn= class in a
+writable user directory.
+
+According to the texlive 2017 [[https://www.tug.org/texlive/doc/texlive-en/texlive-en.pdf][spec]], the value set by TEXMFHOME is the
+recommended location for installing personal macro files or
+packages. This seemed like the most appropriate location to me.
+
+
+On macOS 10.13.3 and using the =tex= distribution provided by MacTeX
+2017, TEXMFHOME is =~/Library/texmf=. 
+
+#+NAME: install-user-lingsyn
+#+BEGIN_SRC shell
+tlmgr init-usertree
+cp lingsyn.cls $(kpsewhich --var-value=TEXMFHOME) 
+# https://www.tug.org/pipermail/tex-live/2010-May/025773.html
+texhash `kpsewhich -var-value=TEXMFHOME)`
+sudo mktexlsr 
+#+END_SRC
+
+*** System Install
+
+The following shell commands are recommended by the [[https://github.com/tsdye/org-article/blob/master/article-class.org][org-article]]
+project for installing TeX files system-wide. 
+
+#+NAME: install-system-lingsyn
+#+BEGIN_SRC shell
+sudo cp linsyn.cls /usr/local/texlive/texmf-local/tex/latex/base/
+sudo mktexlsr
+kpsewhich lingsyn.cls
+#+END_SRC
+
+** Further Reading
+
+- [[http://www.tex.ac.uk/tex-archive/tds/tds.html][Tex Directory Structure]]
+- [[http://tug.org/kpathsea/][Kpathsea]]

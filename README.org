@@ -1,0 +1,4 @@
+#+TITLE: The lingsyn LaTeX class
+
+Refer to [[/lingsyn.org][lingsyn.org]] for package description.
+
