@@ -1,4 +1,4 @@
-% !TEX TS-program = XeLaTeX
+%!TEX TS-program = XeLaTeX
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{lingsyn}[2018/02/22  Class for Ling120B Syntax course documents]
 
@@ -66,6 +66,11 @@ bottom=1in]{geometry}
 \newcommand{\coursesecnum}{1D}
 \newcommand{\coursename}{Syntax I}
 
+% Linguistics Features
+\newcommand{\sel}[1]{$\big[$ $\bullet$ #1 $\bullet$ $\big]$}
+\newcommand{\plusf}[1]{$\big[$ + #1 + $\big]$}
+\newcommand{\proj}[1]{$\overline{\text{#1}}$}
+
 %% Class Options 
 
 \DeclareOption{bluelinks}{%
@@ -74,10 +79,19 @@ bottom=1in]{geometry}
   \renewcommand{\citecolor}{\color{blue}}
 }
 
-\DeclareStringOption{asn}
-\DeclareOption*{\PassOptionsToClass{\CurrentOption}{article}}
-\ProcessOptions\relax
+\newcommand{\coursedoc}{\@title}
+
+
+\DeclareStringOption{num}
 \ProcessKeyvalOptions*
+
+\DeclareOption{assignment}{%
+  \renewcommand{\coursedoc}{Assignment \lingsyn@num}
+}
+\DeclareOption*{\PassOptionsToClass{\CurrentOption}{article}}
+
+\ProcessOptions\relax
+
 
 % Document Formatting
 \pagestyle{fancy}
@@ -90,10 +104,10 @@ bottom=1in]{geometry}
   \ifthenelse{\value{page}=1}%
   {%
     \bfseries%
-    \Large \coursedepartment \, \coursenumber \, - Assignment \lingsyn@asn \\
+    \Large \coursedepartment \, \coursenumber \, - \coursedoc \\
     \large Section \coursesecnum
   }{%
-    \courseabbrev \coursenumber \, - Assignment \lingsyn@asn
+    \courseabbrev \coursenumber \, - \coursedoc
   }%
 }
 

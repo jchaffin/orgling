@@ -26,7 +26,6 @@ possible. This would include:
 - Support for exporting linguistics environments in org-mode syntax
   (as opposed to LaTeX export blocks) .
 
-
 * Included Packages
 - [[https://ctan.org/pkg/forest?lang=en][forest]] :: Draw tree structures with PGF/TikZ
 - [[https://ctan.org/pkg/gb4e][gb4e]] :: Enumerated examples and glossing
@@ -57,7 +56,7 @@ On macOS 10.13.3 and using the =tex= distribution provided by MacTeX
 tlmgr init-usertree
 cp lingsyn.cls $(kpsewhich --var-value=TEXMFHOME) 
 # https://www.tug.org/pipermail/tex-live/2010-May/025773.html
-texhash `kpsewhich -var-value=TEXMFHOME)`
+texhash $(kpsewhich --var-value=TEXMFHOME)
 sudo mktexlsr 
 #+END_SRC
 
