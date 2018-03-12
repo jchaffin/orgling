@@ -6,7 +6,7 @@
 \LoadClass[a4paper, 12pt, colorlinks=true]{article}
 
 % Default Packages used with org export dispatcher
-% \RequirePackage[utf8]{inputenc}
+\RequirePackage[utf8]{inputenc}
 \RequirePackage[T1]{fontenc}
 \RequirePackage{graphicx}
 \RequirePackage{grffile}
@@ -14,8 +14,8 @@
 \RequirePackage{wrapfig}
 \RequirePackage{rotating}
 \RequirePackage[normalem]{ulem}
-% \RequirePackage{amsmath}
-% \RequirePackage{amssymb}
+\RequirePackage{amsmath}
+\RequirePackage{amssymb}
 \RequirePackage{textcomp}
 \RequirePackage{capt-of}
 \RequirePackage{hyperref}
