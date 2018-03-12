@@ -6,7 +6,7 @@
 \LoadClass[a4paper, 12pt, colorlinks=true]{article}
 
 % Default Packages used with org export dispatcher
-\RequirePackage[utf8]{inputenc}
+% \RequirePackage[utf8]{inputenc}
 \RequirePackage[T1]{fontenc}
 \RequirePackage{graphicx}
 \RequirePackage{grffile}
@@ -14,19 +14,19 @@
 \RequirePackage{wrapfig}
 \RequirePackage{rotating}
 \RequirePackage[normalem]{ulem}
-\RequirePackage{amsmath}
+% \RequirePackage{amsmath}
+% \RequirePackage{amssymb}
 \RequirePackage{textcomp}
-\RequirePackage{amssymb}
 \RequirePackage{capt-of}
 \RequirePackage{hyperref}
+\RequirePackage{adjustbox}
 
 % Need to disable shell escape for latexmk when using
 % Tex-command-master
 % \RequirePacakge{minted}
+
 \RequirePackage{soul}
-\RequirePackage[left=0.75in, right=0.75in, top=1.3in,
-bottom=1in]{geometry}
-\RequirePackage{ifthen}
+\RequirePackage[left=0.75in, right=0.75in, top=1.3in, bottom=1in]{geometry}
 \RequirePackage{float}
 \RequirePackage{ifthen}
 
@@ -43,16 +43,26 @@ bottom=1in]{geometry}
 \PassOptionsToPackage{hyperref,x11names}{xcolor}
 \hypersetup{colorlinks=true,urlcolor=black,linkcolor=black}
 
+\DeclareStringOption{num}
+\DeclareBoolOption{tipa}
+\DeclareBoolOption{automath}
+\ProcessKeyvalOptions*
 
-% Linguistics Packages
+% gb4e and tipa don't play well,
+% also might be a font thing.
+\iflingsyn@tipa
 \RequirePackage{linguex}
 \RequirePackage{tipa}
-\RequirePackage{phonrule}
+\else
 \RequirePackage{gb4e}
-\RequirePackage{leipzig}
+\iflingsyn@automath
+% Do nothing
+\else
 \noautomath
-\RequirePackage[linguistics,edges]{forest}
+\fi
+\fi
 
+\RequirePackage[linguistics,edges]{forest}
 
 
 % Class Commands
@@ -66,9 +76,12 @@ bottom=1in]{geometry}
 \newcommand{\coursesecnum}{1D}
 \newcommand{\coursename}{Syntax I}
 
-% Linguistics Features
-\newcommand{\sel}[1]{$\big[$ $\bullet$ #1 $\bullet$ $\big]$}
-\newcommand{\plusf}[1]{$\big[$ + #1 + $\big]$}
+% Features
+\newcommand{\self}[1]{$\big[$$\bullet$#1$\bullet$$\big]$}
+\newcommand{\plusf}[1]{$\big[$+#1+$\big]$}
+
+% Structure 
+\newcommand{\xbar}[1]{$\overline{\text{#1}}$}
 \newcommand{\proj}[1]{$\overline{\text{#1}}$}
 
 %% Class Options 
@@ -82,13 +95,16 @@ bottom=1in]{geometry}
 \newcommand{\coursedoc}{\@title}
 
 
-\DeclareStringOption{num}
-\ProcessKeyvalOptions*
-
 \DeclareOption{assignment}{%
   \renewcommand{\coursedoc}{Assignment \lingsyn@num}
 }
+
+\DeclareOption{notebook}{%
+  \renewcommand{\coursedoc}{Course Notebook}
+}
+
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{article}}
+
 
 \ProcessOptions\relax
 
@@ -124,7 +140,7 @@ bottom=1in]{geometry}
   \bgroup\setlength{\parindent}{0pt}%
   \begin{flushright}
     \@author \\
-    \courseabbrev \, \coursesecnum \, - \coursename \\
+    \courseabbrev \, \coursenumber \, - \coursename \\
     \@date
   \end{flushright}
 }
