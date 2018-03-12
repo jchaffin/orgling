@@ -43,16 +43,22 @@
 \PassOptionsToPackage{hyperref,x11names}{xcolor}
 \hypersetup{colorlinks=true,urlcolor=black,linkcolor=black}
 
-\DeclareStringOption{num}
-\DeclareBoolOption{tipa}
 \DeclareBoolOption{automath}
+\DeclareStringOption{num}
+\DeclareBoolOption{nogloss}
+\DeclareBoolOption{tipa}
+
 \ProcessKeyvalOptions*
 
-% gb4e and tipa don't play well,
-% also might be a font thing.
 \iflingsyn@tipa
 \RequirePackage{linguex}
 \RequirePackage{tipa}
+\else
+% Do nothing
+\fi
+
+\iflingsyn@nogloss
+% Do nothing
 \else
 \RequirePackage{gb4e}
 \iflingsyn@automath
@@ -61,7 +67,6 @@
 \noautomath
 \fi
 \fi
-
 \RequirePackage[linguistics,edges]{forest}
 
 
