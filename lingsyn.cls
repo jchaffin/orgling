@@ -1,9 +1,9 @@
 %!TEX TS-program = XeLaTeX
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{lingsyn}[2018/02/22  Class for Ling120B Syntax course documents]
+\ProvidesClass{lingsyn}[2018/03/12  LaTeX class for UCLA Ling120B Syntax course documents]
 
 \newcommand{\headlinecolor}{\normalcolor}
-\LoadClass[a4paper, 12pt, colorlinks=true]{article}
+\LoadClass[a4paper, 12pt]{article}
 
 % Default Packages used with org export dispatcher
 \RequirePackage[utf8]{inputenc}
