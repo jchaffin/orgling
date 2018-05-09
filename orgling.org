@@ -2,10 +2,10 @@
 
 * Class Description
 
-The =lingsyn= LaTeX class provides some common packages for writing
+The =orgling= LaTeX class provides some common packages for writing
 Linguistics documents in org-mode and exporting to PDF. 
 
-At the moment, the =lingsyn= class is designed for typesetting
+At the moment, the =orgling= class is designed for typesetting
 documents in the style and format of the Ling120B Syntax course I'm
 taking at UCLA. As such, the current implementation really just provides
 a minimal template for a singular publishing format. 
@@ -40,7 +40,7 @@ In order to make the class available outside the project directory, it
 has to be added to a directory where the TeX engine knows to look.
 
 *** User Install
-I used the following commands to install the =lingsyn= class in a
+I used the following commands to install the =orgling= class in a
 writable user directory.
 
 According to the texlive 2017 [[https://www.tug.org/texlive/doc/texlive-en/texlive-en.pdf][spec]], the value set by TEXMFHOME is the
@@ -51,10 +51,10 @@ packages. This seemed like the most appropriate location to me.
 On macOS 10.13.3 and using the =tex= distribution provided by MacTeX
 2017, TEXMFHOME is =~/Library/texmf=. 
 
-#+NAME: install-user-lingsyn
+#+NAME: install-user-orgling
 #+BEGIN_SRC shell
 tlmgr init-usertree
-cp lingsyn.cls $(kpsewhich --var-value=TEXMFHOME) 
+cp orgling.cls $(kpsewhich --var-value=TEXMFHOME) 
 # https://www.tug.org/pipermail/tex-live/2010-May/025773.html
 texhash $(kpsewhich --var-value=TEXMFHOME)
 sudo mktexlsr 
@@ -65,11 +65,11 @@ sudo mktexlsr
 The following shell commands are recommended by the [[https://github.com/tsdye/org-article/blob/master/article-class.org][org-article]]
 project for installing TeX files system-wide. 
 
-#+NAME: install-system-lingsyn
+#+NAME: install-system-orgling
 #+BEGIN_SRC shell
-sudo cp linsyn.cls /usr/local/texlive/texmf-local/tex/latex/base/
+sudo cp orgling.cls /usr/local/texlive/texmf-local/tex/latex/base/
 sudo mktexlsr
-kpsewhich lingsyn.cls
+kpsewhich orgling.cls
 #+END_SRC
 
 ** Further Reading
