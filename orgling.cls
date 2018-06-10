@@ -1,6 +1,6 @@
 %!TEX TS-program = XeLaTeX
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{orgling}[2018/05/8  LaTeX Class for CS180 course documents]
+\ProvidesClass{orgling}[2018/02/22  LaTeX Class for CS180 course documents]
 \LoadClass[a4paper, 12pt]{article}
 
 
@@ -66,8 +66,9 @@
 
 % Font Options
 \DeclareBoolOption{nofontspec}
-\DeclareBoolOption[true]{libertine}
-\DeclareComplementaryOption{times}{libertine}
+\DeclareBoolOption{libertine}
+\DeclareBoolOption{times}
+\DeclareBoolOption{lmodern}
 
 % Optional Package Options
 \DeclareBoolOption{paralist}
@@ -130,6 +131,7 @@
 
 \ifthenelse{\boolean{ORGLING@noamssymb}}{}{%
   \RequirePackage{amsmath}
+  \RequirePackage{stmaryrd}
   \RequirePackage{mathptmx}
   \RequirePackage{amsfonts}
   \RequirePackage{amssymb}
@@ -253,11 +255,24 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%
 \unless\ifORGLING@nofontspec
   \RequirePackage{fontspec}
-  \ifthenelse{\boolean{ORGLING@libertine}}{
-    \setmainfont{Times New Roman}
-  }{%
-    \setmainfont[Ligatures=TeX, Numbers={OldStyle, Proportional}]{Linux Libertine}}
 \fi
+  
+\ifORGLING@lmodern
+ \setromanfont[Ligatures=TeX]{Latin Modern Roman}
+ % \RequirePackage{unicode-math}
+ \setmathfont[math-style=ISO,bold-style=ISO,vargreek-shape=TeX]{Latin Modern Math}
+\fi
+
+
+\ifORGLING@times
+  \setmainfont{Times New Roman}
+\fi
+  
+
+\ifORGLING@libertine
+  \setmainfont[Ligatures=TeX, Numbers={OldStyle, Proportional}]{Linux Libertine}}
+\fi
+  
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -288,6 +303,7 @@
 \ifthenelse{\boolean{ORGLING@noforest}}{}{%
   \RequirePackage{adjustbox}
   \RequirePackage{tikz}
+  \usetikzlibrary{positioning,shapes,fit,arrows}
   \RequirePackage[linguistics,edges]{forest}
 }
 
@@ -304,6 +320,27 @@
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Commands
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% https://tex.stackexchange.com/questions/132783/how-to-write-checkmark-in-latex
+\newcommand*{\boldcheckmark}{%
+  \textpdfrender{
+    TextRenderingMode=FillStroke,
+    LineWidth=.5pt, % half of the line width is outside the normal glyph
+  }{\checkmark}%
+}
+
+\newcommand{\self}[1]{$[$\textbullet#1\textbullet$]$}
+\newcommand{\plusf}[1]{$[$+#1+$]$}
+\newcommand{\selfc}[1]{\self{#1} $\boldcheckmark$}
+\newcommand{\plusfc}[1]{\plusf{#1} $\boldcheckmark$}
+\newcommand{\tns}[1]{Tns$_{\text{#1}}$}
+\newcommand{\proj}[1]{$\overline{\text{#1}}$} % Deprecated
+
+\newcommand{\sub}[1]{\textsubscript{#1}}
+\newcommand{\msub}[2]{\mathrm{#1}_{\mathrm{#2}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Document Formatting
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \pagestyle{plain}
@@ -312,13 +349,9 @@
 \fancyhead{}
 \fancyfoot{}
 
-
-\pagestyle{plain}
-\fancyhead{}
-\fancyfoot{}
-
 \def\lingtitle{\@title}
 \def\lingsubtitle{}
+
 
 \unless\ifORGLING@nodefault
   \ifthenelse{\boolean{ORGLING@homework}}{
