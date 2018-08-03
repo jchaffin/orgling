@@ -3,7 +3,6 @@
 \ProvidesClass{orgling}[2018/02/22  LaTeX Class for CS180 course documents]
 \LoadClass[a4paper, 12pt]{article}
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Class Initialization
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -30,8 +29,6 @@
   prefix=ORGLING@
 } % use shorter name for family name and prefix
 
-
-
 % Org-mode Default Package Options
 \DeclareBoolOption{nofontenc}
 \DeclareBoolOption{nofixltx2e}
@@ -45,7 +42,7 @@
 \DeclareBoolOption{nowasysym}
 \DeclareBoolOption{nointegrals}
 \DeclareBoolOption{nolatexsym}
-\DeclareBoolOption{noamssymb}
+\DeclareBoolOption{noams}
 \DeclareBoolOption{nohyperref}
 
 % Other Default Package Options
@@ -55,7 +52,6 @@
 \DeclareBoolOption{nomulticol}
 \DeclareBoolOption{noenumitem}
 \DeclareBoolOption{noxcolor}
-\DeclareBoolOption{noamsthm}
 \DeclareBoolOption{nocolorthms}
 \DeclareBoolOption{nominted}
 \DeclareBoolOption{nonameref}
@@ -65,10 +61,10 @@
 \DeclareBoolOption{nonatbib}
 
 % Font Options
-\DeclareBoolOption{nofontspec}
 \DeclareBoolOption{libertine}
 \DeclareBoolOption{times}
 \DeclareBoolOption{lmodern}
+\DeclareBoolOption{stix}
 
 % Optional Package Options
 \DeclareBoolOption{paralist}
@@ -84,15 +80,11 @@
 \DeclareBoolOption{nodatetime2}
 
 % Document/Formatting Options
-\DeclareStringOption{coursename}
-\DeclareStringOption{coursenum}
-\DeclareStringOption{coursedept}
-\DeclareStringOption{duedate}
-\DeclareBoolOption{homework}
-\DeclareStringOption{hwnum}
-\DeclareBoolOption{nodefault}
-\DeclareBoolOption{noheader}
-\DeclareComplementaryOption{notebook}{homework}
+\DeclareBoolOption{plain}
+\DeclareBoolOption{empty}
+\DeclareBoolOption{fancy}
+
+\DeclareBoolOption{notebook}
 \DeclareStringOption{seriesnum}
 
 % Process Options
@@ -104,7 +96,6 @@
 
 \ProcessKeyvalOptions*
 \ProcessOptions\relax
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Load Packages
@@ -120,31 +111,24 @@
 \ifthenelse{\boolean{ORGLING@nofloat}}{}{\RequirePackage{float}}
 \ifthenelse{\boolean{ORGLING@nowrapfig}}{}{\RequirePackage{wrapfig}}
 \ifthenelse{\boolean{ORGLING@nosoul}}{}{\RequirePackage{soul}}
-\ifthenelse{\boolean{ORGLING@notextcomp}}{}{\RequirePackage{textcomp}}
-\ifthenelse{\boolean{ORGLING@nomarvosym}}{}{\RequirePackage{marvosym}}
-\ifthenelse{\boolean{ORGLING@nointegrals}}{%
-  {\RequirePackage{nointegrals}}%
-  {\RequirePackage{integrals}}%
-}
-
-\ifthenelse{\boolean{ORGLING@nolatexsym}}{}{\RequirePackage{latexsym}}
-
-\ifthenelse{\boolean{ORGLING@noamssymb}}{}{%
-  \RequirePackage{amsmath}
-  \RequirePackage{stmaryrd}
-  \RequirePackage{mathptmx}
-  \RequirePackage{amsfonts}
-  \RequirePackage{amssymb}
-  \RequirePackage{calligra}
-  \RequirePackage{calrsfs}
-  \RequirePackage[mathscr]{euscript}
-  \DeclareMathAlphabet{\mathcalligra}{T1}{calligra}{m}{n}
-  \newcommand{\R}{\mathbb{R}}
-  \newcommand{\N}{\mathbb{N}}
-  \newcommand{\Z}{\mathbb{Z}}
-}
-
 \ifthenelse{\boolean{ORGLING@noxcolor}}{}{\RequirePackage[dvipsnames,x11names]{xcolor}}
+
+\RequirePackage{amsmath}
+\RequirePackage{xltxtra}
+\RequirePackage{unicode-math}
+
+\setmathfont{STIX2Math}[
+  Path/Users/jacobchaffin/Library/Fonts/,
+  Extension={.otf},
+  Scale=1]
+\setmainfont{STIX2Text}[
+  Path/Users/jacobchaffin/Library/Fonts/,
+  Extension={.otf},
+  UprightFont={*-Regular},
+  BoldFont={*-Bold},
+  ItalicFont={*-Italic},
+  BoldItalicFont={*-BoldItalic}]
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % Other Default Packages
@@ -155,62 +139,6 @@
 \ifthenelse{\boolean{ORGLING@nomulticol}}{}{\RequirePackage{multicol}}
 \ifthenelse{\boolean{ORGLING@noenumitem}}{}{\RequirePackage{enumitem}}
 
-\ifthenelse{\boolean{ORGLING@noamsthm}}{}{%
-  \ifORGLING@noamssymb
-    \RequirePackage{amsmath}
-  \fi
-  \RequirePackage{amsthm}
-  \RequirePackage{thmtools}
-  \definecolor{thmtextcolor}{RGB}{0, 175, 236}
-  \definecolor{thmbackgroundcolor}{RGB}{226, 244, 253}
-
-  \colorlet{LightGray}{White!90!Periwinkle}
-
-  \AtBeginEnvironment{mdframed}{%
-    \def\mdf@footnoterule{}
-  }
-  \declaretheoremstyle[%
-    mdframed={
-      skipabove=8pt,
-      skipbelow=6pt,
-      nobreak=true,
-      hidealllines=true,
-      backgroundcolor={LightGray},
-      innerleftmargin=-3pt,
-      innerrightmargin=5pt,
-      align=center
-    },
-    spaceabove=3pt,spacebelow=3pt,%
-    headfont=\normalfont\bfseries,% 
-    notefont=\normalfont\bfseries,%
-    notebraces={}{. },%
-    headpunct={},%
-    postheadspace=0pt,%
-    postheadhook={\hangindent16pt},
-    headindent=0pt,%
-    bodyfont=\normalfont,%
-    headformat={\llap{\smash{\parbox[t]{0.8in}{\centering \NAME\\
-            \NUMBER}}} \hspace{8pt} \NOTE},%
-  ]{thmsty}
-
-  \declaretheorem[
-    style=thmsty,
-    numberwithin=section
-  ]{theorem}
-
-  \declaretheorem[
-    style=thmsty,
-    sharenumber=theorem
-  ]{definition}
-
-  \declaretheorem[
-    style=thmsty,
-    sharenumber=theorem
-  ]{lemma}
-
-  \renewcommand\thmt@space{}
-
-}
 
 \ifthenelse{\boolean{ORGLING@nominted}}{}{%
   \RequirePackage{minted}
@@ -253,26 +181,14 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % Font Packages
 %%%%%%%%%%%%%%%%%%%%%%%%%
-\unless\ifORGLING@nofontspec
-  \RequirePackage{fontspec}
-\fi
-  
-\ifORGLING@lmodern
- \setromanfont[Ligatures=TeX]{Latin Modern Roman}
- % \RequirePackage{unicode-math}
- \setmathfont[math-style=ISO,bold-style=ISO,vargreek-shape=TeX]{Latin Modern Math}
-\fi
-
 
 \ifORGLING@times
   \setmainfont{Times New Roman}
 \fi
-  
 
 \ifORGLING@libertine
   \setmainfont[Ligatures=TeX, Numbers={OldStyle, Proportional}]{Linux Libertine}}
 \fi
-  
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -307,17 +223,6 @@
   \RequirePackage[linguistics,edges]{forest}
 }
 
-\ifthenelse{\boolean{ORGLING@nodatetime2}}{%
-  \def\duedate{\today}
-}{%
-  \RequirePackage[calc, en-US, showdow]{datetime2}
-  \DTMlangsetup[en-US]{dowmonthsep={,\space}}
-  \ifx\ORGLING@duedate\relax
-    \ClassWarning{orgling}{Option `duedate' is not set.}
-  \else
-    \def\duedate{\DTMDate{\ORGLING@duedate}}
-  \fi
-}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Commands
@@ -343,36 +248,26 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Document Formatting
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\ifORGLING@plain
 \pagestyle{plain}
+\fi
+
+\ifORGLING@empty
+\pagestyle{empty}
+\fi
+
+\ifORGLING@fancy
+\pagestyle{fancy}
+\fi
 
 % Clear all header and footer fields
 \fancyhead{}
 \fancyfoot{}
 
-\def\lingtitle{\@title}
-\def\lingsubtitle{}
 
 
-\unless\ifORGLING@nodefault
-  \ifthenelse{\boolean{ORGLING@homework}}{
-    \def\lingsubtitle{Homework \ORGLING@hwnum \, ::  \duedate \, in class}
-  }{%
-    \def\lingsubtitle{Course Notebook}
-  }
-  \def\lingtitle{\ORGLING@coursedept \, \ORGLING@coursenum : \ORGLING@coursename}
-\fi
 
-\renewcommand{\maketitle}{%
-  \begin{center}
-    \bgroup\setlength{\parindent}{0pt}{\Huge \lingtitle}\egroup \\ \bigskip
-    \large \lingsubtitle \medskip \\
-  \end{center}
 
-  \newlength{\namefieldwidth}
-  \newlength{\authorwidth}
-  \settowidth{\authorwidth}{\@author}
-  \setlength{\namefieldwidth}{\dimexpr(0.5\textwidth - \authorwidth)}
 
-  \par \textbf{Name}: \underline{\@author\hspace{\namefieldwidth}} \\ \medskip
-}
 
