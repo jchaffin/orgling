@@ -1,6 +1,6 @@
 %!TEX TS-program = XeLaTeX
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{orgling}[2018/02/22  LaTeX Class for CS180 course documents]
+\ProvidesClass{orgling}[2018/09/03  LaTeX Class for Linguistics documents]
 \LoadClass[a4paper, 12pt]{article}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -91,15 +91,32 @@
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{article}}
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{scrartcl}}
 
+% Document/Formatting Options
+\DeclareBoolOption{assignment}
+
+%% Assignment Options
+\DeclareStringOption{coursename}
+\DeclareStringOption{coursenumber}
+\DeclareStringOption{dept}
+\DeclareStringOption{name}
+
+\DeclareStringOption{profname}
+\DeclareStringOption{profemail}
+
+\DeclareStringOption{univ}
+\DeclareStringOption{duedate}
 
 \let\ORGLING@duedate\relax % https://tex.stackexchange.com/a/353852/156736
-
+% Process Options
 \ProcessKeyvalOptions*
 \ProcessOptions\relax
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Load Packages
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand*{\ORGLING@DisableOption}[2]{%
+  \DisableKeyvalueOption[
+    action={#1},
+    class=orgling
+  ]{#2}%
+}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % Default Packages
@@ -168,7 +185,7 @@
     }
   }
 }
- 
+
 % \ifthenelse{\boolean{ORGLING@nocleveref}}{}{\RequirePackage{cleveref}}
 
 \ifthenelse{\boolean{ORGLING@nopdfrender}}{}{\RequirePackage{pdfrender}}
