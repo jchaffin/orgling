@@ -17,8 +17,8 @@
 \RequirePackage[left=1in, right=1in, top=1.3in, bottom=1in]{geometry}
 \RequirePackage{fancyhdr}
 \RequirePackage{lastpage}
-\RequirePackage{kvoptions}
-\RequirePackage{kvoptions-patch}
+\RequirePackage[patch,debugshow]{kvoptions}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Option Declarations
