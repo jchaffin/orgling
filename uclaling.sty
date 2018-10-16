@@ -1,0 +1,120 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{uclaling}[2018/10/02 UCLA Linguistics]
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Font Options
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\RequirePackage{fontspec}
+
+\RequirePackage{lastpage}
+\RequirePackage{fancyhdr}
+\RequirePackage{amsmath}
+\RequirePackage{xltxtra}
+\RequirePackage{unicode-math}
+\RequirePackage{ifthen}
+\RequirePackage[patch,debugshow]{kvoptions}
+
+\SetupKeyvalOptions{
+  family=LING,
+  prefix=LING@
+}
+
+\DeclareBoolOption{sans}
+\DeclareBoolOption{libertine}
+\DeclareBoolOption{times}
+\DeclareBoolOption{roman}
+\DeclareBoolOption{stix}
+\DeclareStringOption{coursename}
+\DeclareStringOption{profname}
+\DeclareStringOption{duedate}
+
+\DeclareStringOption[]{style}
+\ProcessKeyvalOptions*
+
+\ifLING@sans
+  \renewcommand{\familydefault}{\sfdefault}
+\fi
+
+\ifLING@times
+  \setmainfont{Times New Roman}
+\fi
+
+%% 'roman' option
+\ifLING@roman
+  \renewcommand{\familydefault}{\rmdefault}
+\fi
+
+\ifLING@libertine
+  \RequirePackage{libertine}
+  
+  \ifxetex
+    \setmathfont[Scale=MatchUppercase]{libertinusmath-regular.otf}
+    \setmonofont{Latin Modern Mono Light}[
+      SmallCapsFont = {Latin Modern Mono Caps}
+      ]
+      \setmainfont[Ligatures = {Common,TeX}]{Linux Libertine}
+      \RequirePackage{xunicode}
+      \else
+      \RequirePackage{sansmath}
+      \RequirePackage{microtype}
+ \fi
+\fi
+
+\ifLING@stix
+
+  \setmathfont{STIX2Math}[
+    Extension = .otf,
+  ]
+  \setmainfont{STIX2Text}[
+    Extension      = .otf,
+    UprightFont    = *-Regular,
+    BoldFont       = *-Bold,
+    ItalicFont     = *-Italic,
+    BoldItalicFont = *-BoldItalic
+  ]
+\fi
+
+ 
+\newcounter{problem}[section]
+\setcounter{problem}{0}
+\newenvironment{problem}[1][]%
+  {\refstepcounter{problem}\par\medskip
+    \begin{flushright}\framebox[0.2\textwidth][r]{\textbf{\theproblem}}\rmfamily\end{flushright}}{\medskip}
+
+
+ 
+\ifthenelse{\equal{\LING@style}{epoole}}{%
+
+  \newcommand*\titlehrule[1][0.4pt]{%
+    \leavevmode\leaders\hrule height#1\hfill\kern0pt
+  }%
+  
+
+  \pagestyle{fancyplain}
+  \renewcommand{\headrulewidth}{0mm}%
+  \fancyhf{}
+  
+  \rfoot{\itshape Page {\thepage} of \pageref{LastPage}}
+
+  \renewcommand{\maketitle}{
+    \setlength{\parindent}{0pt}
+    {\Large\@title}
+    
+    % https://tex.stackexchange.com/a/17130
+    \noindent\titlehrule[0.8 mm]
+
+    \begin{flushright}
+      \LING@profname \\
+      \textsc{\LING@coursename} \\
+      \textbf{Due: \LING@duedate}
+    \end{flushright}
+  }%
+
+}{}
+
+
+\endinput
+
+
