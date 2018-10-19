@@ -1,6 +1,6 @@
 %!TEX TS-program = XeLaTeX
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{orgling}[2018/09/03  LaTeX Class for Linguistics documents]
+\ProvidesClass{orgling}[2018/10/17  LaTeX Class for Linguistics documents]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Class Initialization
@@ -71,7 +71,7 @@
 % Optional Package Options
 \DeclareBoolOption{paralist}
 \DeclareBoolOption{doublespace}
-
+\DeclareBoolOption{onehalfspace}
 % Linguistics Package Options
 \DeclareBoolOption{notipa}
 \DeclareBoolOption{nogb4e}
@@ -82,33 +82,34 @@
 
 % Document/Formatting Options
 % Document/Formatting Options
-\DeclareBoolOption{notebook}
+
 \DeclareBoolOption{epoole}
+\DeclareStringOption[]{type}
+
 \DeclareStringOption{coursename}
 \DeclareStringOption{coursenumber}
+\DeclareStringOption{assignment}
 \DeclareStringOption{dept}
 \DeclareStringOption{profname}
 \DeclareStringOption{profemail}
 \DeclareStringOption{univ}
 \DeclareStringOption{duedate}
 \DeclareStringOption[]{style}
- 
+
+% Wait until options are processed to verify
+% if values are set.
 % https://tex.stackexchange.com/a/353852/156736
 \let\ORGLING@duedate\relax
+\let\ORGLIJNG@assignment\relax
 
 %% Fallback
 \DeclareDefaultOption{%
   \ifx\CurrentOptionValue\relax
-  % \PackageWarningNoLine{\@currname}{%
-  %   Unknown option '\CurrentOption'\MessageBreak
-  %   is passed to 'halfont'%
-  % }%
-  % Pass options to package halfont.
   % Expand \CurrentOption
   \expandafter\PassOptionsToClass
   \expandafter{\CurrentOption}{article}%
   \else
-  \@unknownoptionerror
+    \@unknownoptionerror
   \fi
 }
 \PassOptionsToClass{a4paper}{article}
@@ -125,24 +126,28 @@
 % Package Loading
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\ifx\ORGLING@duedate\relax	
-  \def\duedate{\today}	  
-\else	
+\ifx\ORGLING@duedate\relax
+  \def\duedate{\today}
+\else
   \RequirePackage[calc,en-US,showdow]{datetime2}
   \DTMlangsetup[en-US]
   \def\duedate{\DTMDate{\ORGLING@duedate}}
 \fi
 
-\ifORGLING@epoole
+\unless\ifx\ORGLING@assignment\relax\@empty
+  \PassOptionsToPackage{assignment={\ORGLING@assignment}}{uclacs}
+\fi
+
+
+\ifthenelse{\boolean{ORGLING@epoole}}{%
   \PassOptionsToPackage{
     style=epoole,
     coursename={Ling 165B: Syntax II},
     profname={Ethan Poole},
     duedate={\duedate},
+    \ORGLING@type,
     libertine}{uclaling}
-  \else
-  \PassOptionsToPackage{\ORGLING@font}{uclaling}
-\fi
+}{\PassOptionsToPackage{\ORGLING@font}{uclaling}}
 
 \RequirePackage{uclaling}
 \ifthenelse{\boolean{ORGLING@nographicx}}{}{\RequirePackage{graphicx}}
@@ -167,6 +172,7 @@
 
 \ifthenelse{\boolean{ORGLING@nonameref}}{}{\RequirePackage{nameref}}
 \ifthenelse{\boolean{ORGLING@novarioref}}{}{\RequirePackage{varioref}}
+
 \ifthenelse{\boolean{ORGLING@nohyperref}}{}{%
   \RequirePackage{hyperref}
   \ifORGLING@noxcolor
@@ -186,12 +192,12 @@
   }
 }
 
-% \ifthenelse{\boolean{ORGLING@nocleveref}}{}{\RequirePackage{cleveref}}
-
 \ifthenelse{\boolean{ORGLING@nopdfrender}}{}{\RequirePackage{pdfrender}}
 
 \ifthenelse{\boolean{ORGLING@nonatbib}}{}{%
-  \RequirePackage[numbers,comma]{natbib}
+  \RequirePackage[longnamesfirst]{natbib}
+  \setcitestyle{authoryear,round,semicolon,%
+  aysep={}, yysep={,}, notesep={:}}
   \RequirePackage[version=3]{mhchem}
 }
 
@@ -199,9 +205,13 @@
 % Optional Packages
 %%%%%%%%%%%%%%%%%%%%%%%%%
 \ifthenelse{\boolean{ORGLING@paralist}}{\RequirePackage{paralist}}{}
-\ifthenelse{\boolean{ORGLING@doublespace}}{%
+\ifthenelse{\boolean{ORGLING@doublespace}\or\boolean{ORGLING@onehalfspace}}{%
   \RequirePackage{setspace}
-  \doublespacing
+  \ifORGLING@doublespace
+    \doublespacing
+  \else
+    \onehalfspacing
+  \fi
 }{}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -211,17 +221,14 @@
   \RequirePackage{linguex}
   % Use 'safe' option to inhibit loading of possibly
   % 'dangerous' commands.
-  \ifxetex
-  \PassOptionsToPackage{safe}{tipa}
-  \fi
-  \RequirePackage{tipa}
+  \RequirePackage[safe]{tipa}
 }
 
 \ifthenelse{\boolean{ORGLING@nogb4e}\or\boolean{ORGLING@nogloss}}{}{%
-  \RequirePackage{gb4e}
-  \unless\ifORGLING@automath
+  \AtEndOfClass{%
+    \RequirePackage{gb4e}
     \noautomath
-  \fi
+  }
 }
 
 \ifthenelse{\boolean{ORGLING@noforest}}{}{%
@@ -231,45 +238,22 @@
   \RequirePackage{tikz-qtree-compat}
 
   \RequirePackage{syntrace}
-  \usetikzlibrary{positioning,shapes,fit,arrows}
+
+  \usetikzlibrary{positioning,shapes,fit,arrows.meta, calc}
+   \tikzset{exarrows/.style={semithick,
+ arrows={-Stealth[scale=1, scale length=1,
+ scale width=1]}}}
+  \DeclareDocumentCommand \tikzexsetup {} {%
+  \tikzstyle{every picture}+=[remember picture, inner sep=0pt,
+  baseline, anchor=base]}
+  % arg 1: optional strut; arg 2: node name; arg 3: node content
+  \DeclareDocumentCommand \ND {s m m} {%
+  \tikzifinpicture{}{\tikz}\node(#2){\IfBooleanTF{#1}{\strut}{}#3};}
+
   \RequirePackage{forest}
   \useforestlibrary{linguistics}
+
   \forestset{
-    % Begin nice nodes
-    nice nodes/.style={
-      for tree={
-        inner sep=1 pt,
-        s sep=12pt,
-        fit=band
-      }
-    },
-    % Begin fairly nice empty nodes
-    fairly nice empty nodes/.style={
-      delay={
-        where content={}{
-          shape=coordinate,
-          for parent={
-            for children={anchor=north}
-          }
-        }
-      }
-    },
-    % Begin pretty nice empty nodes
-    pretty nice empty nodes/.style={
-      for tree={
-        calign=fixed edge angles,
-        parent anchor=children,
-        delay={
-          if content={}{
-            inner sep=0pt,
-            edge path={
-              \noexpand\path [\forestoption{edge}] (!u.parent anchor) --
-              (.children)\forestoption{edge label} ;
-            }
-          }{}
-        }
-      }
-    },
     % Begin perfectly nice empty nodes
     perfectly nice empty nodes/.style={
       for tree={
@@ -296,8 +280,6 @@
       nice nodes
     }
   }
-
-  \forestapplylibrarydefaults{linguistics}
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -315,14 +297,9 @@
 \newcommand{\sfeatc}[1]{\sfeat{#1} \boldcheckmark}
 \newcommand{\sfeats}[1]{\sout{\sfeat{#1}}}
 \newcommand{\pfeat}[1]{$[$+#1+$]$}
-
 \newcommand{\pfeatc}[1]{\plusf{#1} $\boldcheckmark$}
 \newcommand{\tns}[1]{Tns$_{\text{#1}}$}
-
 \newcommand{\proj}[1]{$\overline{\text{#1}}$} % Deprecated
 
-
-% \newcommand{\sub}[1]{\textsubscript{#1}}
-% \newcommand{\msub}[2]{\mathrm{#1}_{\mathrm{#2}}}
 
 

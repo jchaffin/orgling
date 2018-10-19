@@ -1,15 +1,13 @@
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{uclaling}[2018/10/02 UCLA Linguistics]
-
+\ProvidesPackage{uclaling}[2018/10/02 Package for UCLA Linguistics documents.]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Font Options
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \RequirePackage{fontspec}
-
 \RequirePackage{lastpage}
 \RequirePackage{fancyhdr}
+\RequirePackage{setspace}
 \RequirePackage{amsmath}
 \RequirePackage{xltxtra}
 \RequirePackage{unicode-math}
@@ -21,17 +19,32 @@
   prefix=LING@
 }
 
+%% Font Options
 \DeclareBoolOption{sans}
 \DeclareBoolOption{libertine}
 \DeclareBoolOption{times}
 \DeclareBoolOption{roman}
 \DeclareBoolOption{stix}
+
 \DeclareStringOption{coursename}
 \DeclareStringOption{profname}
+\DeclareStringOption{coursenumber}
 \DeclareStringOption{duedate}
 
 \DeclareStringOption[]{style}
+
+\DeclareBoolOption{homework}
+\DeclareBoolOption{squib}
+\DeclareStringOption{assignment}
+
 \ProcessKeyvalOptions*
+
+\newcommand*{\uclaling@DisableOption}[2]{
+  \DisableKeyvalOption[
+    action={#1},
+    package=uclaling
+  ]{LING}{#2}
+}
 
 \ifLING@sans
   \renewcommand{\familydefault}{\sfdefault}
@@ -46,27 +59,45 @@
   \renewcommand{\familydefault}{\rmdefault}
 \fi
 
+%% 'libertine' option
 \ifLING@libertine
   \RequirePackage{libertine}
-  
+  % See  Manual for Linux Libertine with XeTeX
+  % http://linuxlibertine.sourceforge.net/Libertine-XeTex-EN.pdf
   \ifxetex
+    % Loads fontspec, metalogo, and realscripts packages
+    % Might be unnecessary with a modern XeTeX so
+    % commenting out for now.
+    % \RequirePackage{xltxtra}
+    % Convert accent-glyph sequences to single Unicode characters
+    % \RequirePackage{xunicode}
+    % Recommended configuration for compatible mathematics
+    % XeLaTeX. From Section 6 - Concluding Remarks (p. 5) of the
+    % the libertine package manual.
     \setmathfont[Scale=MatchUppercase]{libertinusmath-regular.otf}
+    % set the main font to Linux Libertine
+    \setmainfont[Ligatures={Common,TeX}]{Linux Libertine}
+    % TODO set sans font to Linux Biolinum
+    % TODO set mono font to Linux Mono
+    % For now, using Latin Modern Mono as a replacement.
+    % Set the monospace font to Latin Modern
     \setmonofont{Latin Modern Mono Light}[
       SmallCapsFont = {Latin Modern Mono Caps}
-      ]
-      \setmainfont[Ligatures = {Common,TeX}]{Linux Libertine}
-      \RequirePackage{xunicode}
-      \else
-      \RequirePackage{sansmath}
-      \RequirePackage{microtype}
- \fi
+    ]
+  \else
+    % Recommended math font for xtmath
+    % \RequirePackage[libertine]{newxtmath}
+    % Typographic extensions for PdfTeX
+    \RequirePackage{microtype}
+  \fi
 \fi
 
 \ifLING@stix
-
+  % Set the math font to Stix Two Math.
   \setmathfont{STIX2Math}[
     Extension = .otf,
   ]
+  % Set the main font to Stix Two Text
   \setmainfont{STIX2Text}[
     Extension      = .otf,
     UprightFont    = *-Regular,
@@ -76,45 +107,93 @@
   ]
 \fi
 
- 
+ % Problem environment
 \newcounter{problem}[section]
 \setcounter{problem}{0}
+
 \newenvironment{problem}[1][]%
   {\refstepcounter{problem}\par\medskip
-    \begin{flushright}\framebox[0.2\textwidth][r]{\textbf{\theproblem}}\rmfamily\end{flushright}}{\medskip}
+    \begin{flushright}\framebox[0.2\textwidth][r]{\textbf{\theproblem}}\rmfamily\end{flushright}
+  }
+  {\medskip}%
 
+ \def\assignmentname{}
+ \unless\ifx\LING@assignment\@empty
+   \renewcommand{\assignmentname}{\LING@assignment}
+ \fi
 
- 
+\def\coursename{}
+\unless\ifx\LING@coursename\@empty
+  \renewcommand{\coursename}{\LING@coursename}
+\fi
+\def\profname{}
+\unless\ifx\LING@profname\@empty
+  \renewcommand{\profname}{\LING@profname}
+\fi
+
+\def\courserecord{}
+\unless\ifx\LING@coursenumber\@empty
+  \renewcommand{\courserecord}{Ling \LING@coursenumber}
+\fi
+
 \ifthenelse{\equal{\LING@style}{epoole}}{%
-
+  % Create a header rule with variable height.
+  % From https://tex.stackexchange.com/a/17130
   \newcommand*\titlehrule[1][0.4pt]{%
     \leavevmode\leaders\hrule height#1\hfill\kern0pt
-  }%
-  
+  }
+  %%% Homework style
+  \ifthenelse{\boolean{LING@homework}}{%
+    \pagestyle{fancyplain}
+    \renewcommand{\headrulewidth}{0mm}%
+    \fancyhf{}
+    \rfoot{\itshape Page {\thepage} of \pageref{LastPage}}
+    \renewcommand{\maketitle}{%
+      \setlength{\parindent}{0pt}
+      {\Large\@title} \\
+      \noindent\titlehrule[0.8 mm] % https://tex.stackexchange.com/a/17130
+      \begin{flushright}
+        \LING@profname \\
+        \textsc{\LING@coursename} \\
+        \textbf{Due: \LING@duedate}
+      \end{flushright}
+    }
+  }{%
+    \ifLING@stix
+       \uclaling@DisableOption{undef}{libertine}
+    \fi
+    \pagestyle{fancyplain}
+    \renewcommand{\headrulewidth}{0mm}
+    \fancyhf{}
+    \renewcommand{\maketitle}{%
+      \setlength{\parindent}{0pt}
+      % Left Header
+      {\Large \@title}\hfill
+      \@author \\
+      \assignmentname -- \coursename \\
 
-  \pagestyle{fancyplain}
-  \renewcommand{\headrulewidth}{0mm}%
-  \fancyhf{}
-  
-  \rfoot{\itshape Page {\thepage} of \pageref{LastPage}}
-
-  \renewcommand{\maketitle}{
-    \setlength{\parindent}{0pt}
-    {\Large\@title}
-    
-    % https://tex.stackexchange.com/a/17130
-    \noindent\titlehrule[0.8 mm]
-
-    \begin{flushright}
-      \LING@profname \\
-      \textsc{\LING@coursename} \\
-      \textbf{Due: \LING@duedate}
-    \end{flushright}
-  }%
-
-}{}
-
+      \noindent\titlehrule[0.4mm]
+      \begin{flushright}
+        \textbf{\LING@duedate}
+      \end{flushright}
+     }
+   }
+ }{%
+   \RequirePackage[letterpaper]{geometry}
+   \geometry{top=1.0in, bottom=1.0in, left=1.5in, right=1.5in}
+   \renewcommand{\maketitle}{%
+   \setlength{\parindent}{0pt}
+   {\LARGE \@title} \\\\\medskip
+   {\large \it \coursename}
+   \begin{flushright}
+     \@author \\
+     \@date \\
+     \courserecord
+   \end{flushright}
+  }
+}
 
 \endinput
+
 
 
