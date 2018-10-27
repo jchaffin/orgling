@@ -24,6 +24,7 @@
 \DeclareBoolOption{libertine}
 \DeclareBoolOption{times}
 \DeclareBoolOption{roman}
+\DeclareBoolOption{lmodern}
 \DeclareBoolOption{stix}
 
 \DeclareStringOption{coursename}
@@ -37,6 +38,7 @@
 \DeclareBoolOption{squib}
 \DeclareStringOption{assignment}
 
+
 \ProcessKeyvalOptions*
 
 \newcommand*{\uclaling@DisableOption}[2]{
@@ -46,21 +48,36 @@
   ]{LING}{#2}
 }
 
-\ifLING@sans
+\newboolean{uselibertine}
+
+\ifLING@sans % 'sans' option
   \renewcommand{\familydefault}{\sfdefault}
+  
 \fi
-
-\ifLING@times
+\ifLING@times % 'times' option
   \setmainfont{Times New Roman}
+  \setboolean{uselibertine}{false}
 \fi
-
-%% 'roman' option
-\ifLING@roman
+\ifLING@roman % 'roman' option
   \renewcommand{\familydefault}{\rmdefault}
+  \setboolean{uselibertine}{false}
 \fi
-
-%% 'libertine' option
-\ifLING@libertine
+\ifLING@stix % 'stix' option
+  \setboolean{uselibertine}{false}
+  % Set the math font to Stix Two Math.
+  \setmathfont{STIX2Math}[
+    Extension = .otf,
+  ]
+  % Set the main font to Stix Two Text
+  \setmainfont{STIX2Text}[
+    Extension      = .otf,
+    UprightFont    = *-Regular,
+    BoldFont       = *-Bold,
+    ItalicFont     = *-Italic,
+    BoldItalicFont = *-BoldItalic
+  ]
+\fi
+\ifLING@libertine % 'libertine' option
   \RequirePackage{libertine}
   % See  Manual for Linux Libertine with XeTeX
   % http://linuxlibertine.sourceforge.net/Libertine-XeTex-EN.pdf
@@ -68,9 +85,9 @@
     % Loads fontspec, metalogo, and realscripts packages
     % Might be unnecessary with a modern XeTeX so
     % commenting out for now.
-    % \RequirePackage{xltxtra}
+    \RequirePackage{xltxtra}
     % Convert accent-glyph sequences to single Unicode characters
-    % \RequirePackage{xunicode}
+    \RequirePackage{xunicode}
     % Recommended configuration for compatible mathematics
     % XeLaTeX. From Section 6 - Concluding Remarks (p. 5) of the
     % the libertine package manual.
@@ -92,21 +109,6 @@
   \fi
 \fi
 
-\ifLING@stix
-  % Set the math font to Stix Two Math.
-  \setmathfont{STIX2Math}[
-    Extension = .otf,
-  ]
-  % Set the main font to Stix Two Text
-  \setmainfont{STIX2Text}[
-    Extension      = .otf,
-    UprightFont    = *-Regular,
-    BoldFont       = *-Bold,
-    ItalicFont     = *-Italic,
-    BoldItalicFont = *-BoldItalic
-  ]
-\fi
-
  % Problem environment
 \newcounter{problem}[section]
 \setcounter{problem}{0}
@@ -117,81 +119,103 @@
   }
   {\medskip}%
 
- \def\assignmentname{}
+ 
+\def\uclalingassignmentname{}
  \unless\ifx\LING@assignment\@empty
-   \renewcommand{\assignmentname}{\LING@assignment}
+   \renewcommand{\uclalingassignmentname}{\LING@assignment}
  \fi
-
-\def\coursename{}
+\def\uclalingcoursename{}
 \unless\ifx\LING@coursename\@empty
-  \renewcommand{\coursename}{\LING@coursename}
+  \renewcommand{\uclalingcoursename}{\LING@coursename}
 \fi
-\def\profname{}
+\def\uclalingprofname{}
 \unless\ifx\LING@profname\@empty
-  \renewcommand{\profname}{\LING@profname}
+  \renewcommand{\uclalingprofname}{\LING@profname}
 \fi
-
-\def\courserecord{}
+\def\uclalingcoursenumber{}
 \unless\ifx\LING@coursenumber\@empty
-  \renewcommand{\courserecord}{Ling \LING@coursenumber}
+ \renewcommand{\uclalingcoursenumber}{\LING@coursenumber}
 \fi
 
+
+% Use Month Day, Year format
+
+\def\uclalingduedate{}
+\unless\ifx\LING@duedate\@empty
+  \renewcommand{\uclalingduedate}{\LING@duedate}
+\fi
+
+% Opinionated formatting for LaTeX documents 
+%  in the format of UCLA syntax professor
+%  Ethan Poole.
 \ifthenelse{\equal{\LING@style}{epoole}}{%
+
   % Create a header rule with variable height.
   % From https://tex.stackexchange.com/a/17130
   \newcommand*\titlehrule[1][0.4pt]{%
     \leavevmode\leaders\hrule height#1\hfill\kern0pt
-  }
-  %%% Homework style
-  \ifthenelse{\boolean{LING@homework}}{%
-    \pagestyle{fancyplain}
-    \renewcommand{\headrulewidth}{0mm}%
-    \fancyhf{}
-    \rfoot{\itshape Page {\thepage} of \pageref{LastPage}}
-    \renewcommand{\maketitle}{%
-      \setlength{\parindent}{0pt}
-      {\Large\@title} \\
-      \noindent\titlehrule[0.8 mm] % https://tex.stackexchange.com/a/17130
-      \begin{flushright}
-        \LING@profname \\
-        \textsc{\LING@coursename} \\
-        \textbf{Due: \LING@duedate}
-      \end{flushright}
-    }
-  }{%
-    \ifLING@stix
-       \uclaling@DisableOption{undef}{libertine}
-    \fi
-    \pagestyle{fancyplain}
-    \renewcommand{\headrulewidth}{0mm}
-    \fancyhf{}
-    \renewcommand{\maketitle}{%
-      \setlength{\parindent}{0pt}
-      % Left Header
-      {\Large \@title}\hfill
-      \@author \\
-      \assignmentname -- \coursename \\
+  } 
+ \pagestyle{fancyplain}
+ \renewcommand{\headrulewidth}{0mm}% 
+ \fancyhf{} % Clear header
+ \ifthenelse{\boolean{LING@homework}}{% epoole homework style
+   \rfoot{\itshape Page {\thepage} of \pageref{LastPage}} % Page X of Y
+   \renewcommand{\maketitle}{%
+     \setlength{\parindent}{0pt}
+     {\Large\@title}\hfill
+     \@author\\
+     \noindent\titlehrule[0.8 mm] % Use a 0.8mm tick header rule. 
 
-      \noindent\titlehrule[0.4mm]
-      \begin{flushright}
-        \textbf{\LING@duedate}
-      \end{flushright}
+     \begin{flushright}
+      \LING@profname \\
+      \unless\ifx\coursename\@empty
+         \textbf{\uclalingcoursename} \\
+      \fi
+      \textbf{Due: \uclalingduedate}
+     \end{flushright}
+    }
+  }{% 'epoole' non-homework option
+     % A font option was specified. Allow
+     % overriding libertine as the default font
+     % when the 'homework' option was not given.
+     % \ifthenelse{\boolean{uselibertine}}{}{%
+     %   \uclaling@DisableOption{undef}{libertine}  
+     % }
+
+     \renewcommand{\maketitle}{%
+       \setlength{\parindent}{0pt}
+       % Left Header
+       {\Large \@title}\hfill
+       \@author \\
+       \noindent\titlehrule[0.4mm]
+
+       \begin{flushright}
+        \uclalingduedate
+       \end{flushright}
      }
    }
  }{%
-   \RequirePackage[letterpaper]{geometry}
-   \geometry{top=1.0in, bottom=1.0in, left=1.5in, right=1.5in}
-   \renewcommand{\maketitle}{%
-   \setlength{\parindent}{0pt}
-   {\LARGE \@title} \\\\\medskip
-   {\large \it \coursename}
-   \begin{flushright}
-     \@author \\
-     \@date \\
-     \courserecord
-   \end{flushright}
+  \ifthenelse{\equal{\LING@style}{phonetics}}{%
+    \RequirePackage{vocaltract} % vocal tract animation
+    \RequirePackage{phonetic} % Phonetics macros
+    \RequirePackage{phonrule} 
+    \RequirePackage{phonenumbers}
+    \RequirePackage{ipaex-type1}
+  }{% no style option given
+    \renewcommand{\maketitle}{%
+      \setlength{\parindent}{0pt}
+      {\LARGE \@title} \\\\\medskip
+      \begin{flushright}
+        \@author \\
+        \unless\ifx\uclalingcoursenumber\@empty
+          \uclalingcoursenumber \\
+        \fi
+        \uclalingduedate
+      \end{flushright}
+    }
   }
 }
+ 
 
 \endinput
 

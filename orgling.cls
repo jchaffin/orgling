@@ -35,7 +35,6 @@
 \DeclareBoolOption{nolatexsym}
 \DeclareBoolOption{noams}
 \DeclareBoolOption{nohyperref}
-
 % Other Default Package Options
 \DeclareBoolOption{noulem}
 \DeclareBoolOption{norotating}
@@ -51,10 +50,22 @@
 \DeclareBoolOption{novarioref}
 \DeclareBoolOption{nopdfrender}
 \DeclareBoolOption{nonatbib}
-
+% Optional Package Options
+\DeclareBoolOption{paralist}
+\DeclareBoolOption{doublespace}
+\DeclareBoolOption{onehalfspace}
+% Linguistics Package Options
+\DeclareBoolOption{notipa}
+\DeclareBoolOption{nogloss} % Alias to elide gb4e and expex
+\DeclareBoolOption{nogb4e}
+\DeclareBoolOption{automath}
+\DeclareBoolOption{noforest}
+\DeclareBoolOption{nodatetime2}
 %% Font options pass to 'uclaling.sty'
+% Setup font options
+% See pg. 9 Section 3 Example of kvoptions package
+% https://ctan.org/pkg/kvoptions
 \DeclareStringOption[sans]{font}
-
 \newcommand*{\SetupFont}{%
   \expandafter\@SetupFont\expandafter{\CurrentOption}%
 }
@@ -68,24 +79,20 @@
   \setkeys{ORGLING}{font={#1}}%
 }
 
-% Optional Package Options
-\DeclareBoolOption{paralist}
-\DeclareBoolOption{doublespace}
-\DeclareBoolOption{onehalfspace}
-% Linguistics Package Options
-\DeclareBoolOption{notipa}
-\DeclareBoolOption{nogb4e}
-\DeclareBoolOption{nogloss} % Alias to elide gb4e
-\DeclareBoolOption{automath}
-\DeclareBoolOption{noforest}
-\DeclareBoolOption{nodatetime2}
+\DeclareStringOption{style}
+
+\newcommand*{\SetupStyle}{%
+  \expandafter\@SetupStyle\expandafter{\CurrentOption}%
+}
+\DeclareVoidOption{epoole}{\SetupStyle}
+\DeclareVoidOption{phonetics}{\SetupStyle}
+
+\newcommand*{\@SetupStyle}[1]{%
+  \setkeys{ORGLING}{style={#1}} %
+}
 
 % Document/Formatting Options
-% Document/Formatting Options
-
-\DeclareBoolOption{epoole}
 \DeclareStringOption[]{type}
-
 \DeclareStringOption{coursename}
 \DeclareStringOption{coursenumber}
 \DeclareStringOption{assignment}
@@ -94,14 +101,13 @@
 \DeclareStringOption{profemail}
 \DeclareStringOption{univ}
 \DeclareStringOption{duedate}
-\DeclareStringOption[]{style}
 
 % Wait until options are processed to verify
 % if values are set.
 % https://tex.stackexchange.com/a/353852/156736
+\let\ORGLING@assignment\relax
+\let\ORGLING@style\relax
 \let\ORGLING@duedate\relax
-\let\ORGLIJNG@assignment\relax
-
 %% Fallback
 \DeclareDefaultOption{%
   \ifx\CurrentOptionValue\relax
@@ -126,30 +132,39 @@
 % Package Loading
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\ifx\ORGLING@duedate\relax
-  \def\duedate{\today}
-\else
-  \RequirePackage[calc,en-US,showdow]{datetime2}
-  \DTMlangsetup[en-US]
-  \def\duedate{\DTMDate{\ORGLING@duedate}}
-\fi
-
 \unless\ifx\ORGLING@assignment\relax\@empty
   \PassOptionsToPackage{assignment={\ORGLING@assignment}}{uclacs}
 \fi
 
+\def\orglingfont{\ORGLING@font}
 
-\ifthenelse{\boolean{ORGLING@epoole}}{%
-  \PassOptionsToPackage{
-    style=epoole,
-    coursename={Ling 165B: Syntax II},
-    profname={Ethan Poole},
-    duedate={\duedate},
-    \ORGLING@type,
-    libertine}{uclaling}
-}{\PassOptionsToPackage{\ORGLING@font}{uclaling}}
+
+\RequirePackage[calc,en-US]{datetime2}
+\DTMlangsetup[en-US]{showdayofmonth=true}
+
+\def\duedate{\today}
+\unless\ifx\ORGLING@duedate\relax
+  \def\duedate{\DTMDate{\ORGLING@duedate}}
+\fi
+
+\PassOptionsToPackage{duedate={\duedate}}{uclaling}
+
+\unless\ifx\ORGLING@style\relax\@empty
+  \def\orglingstyle{\ORGLING@style}
+  \ifthenelse{\equal{\orglingstyle}{epoole}}{%
+    \renewcommand{\orglingfont}{libertine}
+    \PassOptionsToPackage{
+      style=epoole,
+      coursename={Ling 165B: Syntax II},
+      profname={Ethan Poole},
+      \ORGLING@type
+    }{uclaling}
+  }{\PassOptionsToPackage{style={\orglingstyle}}{uclaling}}
+\fi
+\PassOptionsToPackage{\orglingfont}{uclaling}
 
 \RequirePackage{uclaling}
+
 \ifthenelse{\boolean{ORGLING@nographicx}}{}{\RequirePackage{graphicx}}
 \ifthenelse{\boolean{ORGLING@nolongtable}}{}{\RequirePackage{longtable}}
 \ifthenelse{\boolean{ORGLING@nofloat}}{}{\RequirePackage{float}}
@@ -180,7 +195,6 @@
   \else
     \colorlet{csurlcolor}{black}
   \fi
-
   \AtEndPreamble{
      \hypersetup{
        colorlinks=true,
@@ -192,14 +206,16 @@
   }
 }
 
-\ifthenelse{\boolean{ORGLING@nopdfrender}}{}{\RequirePackage{pdfrender}}
+\ifpdf
+  \ifthenelse{\boolean{ORGLING@nopdfrender}}{}{\RequirePackage{pdfrender}}
+\fi
 
-\ifthenelse{\boolean{ORGLING@nonatbib}}{}{%
-  \RequirePackage[longnamesfirst]{natbib}
-  \setcitestyle{authoryear,round,semicolon,%
-  aysep={}, yysep={,}, notesep={:}}
-  \RequirePackage[version=3]{mhchem}
-}
+% \ifthenelse{\boolean{ORGLING@nonatbib}}{}{%
+%   \RequirePackage[longnamesfirst]{natbib}
+%   \setcitestyle{authoryear,round,semicolon,%
+%   aysep={}, yysep={,}, notesep={:}}
+%   \RequirePackage[version=3]{mhchem}
+% }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % Optional Packages
@@ -217,69 +233,46 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % Linguistics Packages
 %%%%%%%%%%%%%%%%%%%%%%%%%
-\ifthenelse{\boolean{ORGLING@notipa}}{}{%
-  \RequirePackage{linguex}
-  % Use 'safe' option to inhibit loading of possibly
-  % 'dangerous' commands.
-  \RequirePackage[safe]{tipa}
-}
-
-\ifthenelse{\boolean{ORGLING@nogb4e}\or\boolean{ORGLING@nogloss}}{}{%
-  \AtEndOfClass{%
+% \unless\ifx\ORGLING@nogloss \fi
+\ifthenelse{\boolean{ORGLING@nogb4e}}{%
+  \AtEndOfClass{
     \RequirePackage{gb4e}
-    \noautomath
+    \unless\ifx\ORGLING@automath
+      \noautomath
+    \fi
+  }{%
+    \AtEndOfClass{
+      \RequirePackage{expex}
+      \definelingstyle{exarrbelow}{belowexskip=1em plus 0.375em minus 0.25em} 
+    }
   }
-}
+}{}
 
 \ifthenelse{\boolean{ORGLING@noforest}}{}{%
   \RequirePackage{adjustbox}
   \RequirePackage{tikz}
-  \RequirePackage{tikz-qtree}
-  \RequirePackage{tikz-qtree-compat}
-
-  \RequirePackage{syntrace}
-
-  \usetikzlibrary{positioning,shapes,fit,arrows.meta, calc}
-   \tikzset{exarrows/.style={semithick,
- arrows={-Stealth[scale=1, scale length=1,
- scale width=1]}}}
-  \DeclareDocumentCommand \tikzexsetup {} {%
-  \tikzstyle{every picture}+=[remember picture, inner sep=0pt,
-  baseline, anchor=base]}
-  % arg 1: optional strut; arg 2: node name; arg 3: node content
-  \DeclareDocumentCommand \ND {s m m} {%
-  \tikzifinpicture{}{\tikz}\node(#2){\IfBooleanTF{#1}{\strut}{}#3};}
-
-  \RequirePackage{forest}
-  \useforestlibrary{linguistics}
-
-  \forestset{
-    % Begin perfectly nice empty nodes
-    perfectly nice empty nodes/.style={
-      for tree={
-        calign=fixed edge angles,
-        parent anchor=south
-      },
-      before typesetting nodes={
-        where content={}{
-          text width=.001pt,
-          inner sep=0pt,
-          before drawing tree={
-            shape=coordinate,
-            typeset node
-          },
-          for parent={
-            for children={
-              anchor=north
-            }
-          }
-        }{}
+  \usetikzlibrary{positioning,shapes,fit,arrows.meta,calc}
+  \tikzset{
+    exarrows/.style={%
+    semithick,
+      arrows={%
+        -Stealth[
+          scale=1, scale length=1,
+          scale width=1
+        ]
       }
-    },
-    default preamble={
-      nice nodes
     }
   }
+  \DeclareDocumentCommand \tikzexsetup {} {%
+    \tikzstyle{every picture}+=[
+    remember picture, inner sep=0pt,
+    baseline, anchor=base
+    ]
+  }
+  % arg 1: optional strut; arg 2: node name; arg 3: node content
+  \DeclareDocumentCommand \ND {s m m} {%
+    \tikzifinpicture{}{\tikz}\node(#2){\IfBooleanTF{#1}{\strut}{}#3};}
+  \RequirePackage[linguistics,edges]{forest}
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -297,7 +290,13 @@
 \newcommand{\sfeatc}[1]{\sfeat{#1} \boldcheckmark}
 \newcommand{\sfeats}[1]{\sout{\sfeat{#1}}}
 \newcommand{\pfeat}[1]{$[$+#1+$]$}
+\newcommand{\pagree}[1]{$[\star\pi$: #1 $*]$}
+\newcommand{\nagree}[1]{$[\star\#$: #1 $*]$}
+\newcommand{\ppagree}[1]{$[\pi$: #1$]$}
+\newcommand{\nnagree}[1]{$[\#$: #1$]$}
 \newcommand{\pfeatc}[1]{\plusf{#1} $\boldcheckmark$}
+
+
 \newcommand{\tns}[1]{Tns$_{\text{#1}}$}
 \newcommand{\proj}[1]{$\overline{\text{#1}}$} % Deprecated
 
