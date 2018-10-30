@@ -41,7 +41,7 @@ has to be added to a directory where the TeX engine knows to look.
 
 *** User Install
 I used the following commands to install the =orgling= class in a
-writable user directory.
+nwritable user directory.
 
 According to the texlive 2017 [[https://www.tug.org/texlive/doc/texlive-en/texlive-en.pdf][spec]], the value set by TEXMFHOME is the
 recommended location for installing personal macro files or

@@ -48,12 +48,19 @@
   ]{LING}{#2}
 }
 
+
+
 \newboolean{uselibertine}
+
+\ifxetex
+\RequirePackage{stoneipa}
+\newcommand\ipa[1]{{\sipafont #1}}
+\fi
 
 \ifLING@sans % 'sans' option
   \renewcommand{\familydefault}{\sfdefault}
-  
 \fi
+
 \ifLING@times % 'times' option
   \setmainfont{Times New Roman}
   \setboolean{uselibertine}{false}
@@ -109,6 +116,7 @@
   \fi
 \fi
 
+
  % Problem environment
 \newcounter{problem}[section]
 \setcounter{problem}{0}
@@ -158,20 +166,24 @@
  \pagestyle{fancyplain}
  \renewcommand{\headrulewidth}{0mm}% 
  \fancyhf{} % Clear header
+
  \ifthenelse{\boolean{LING@homework}}{% epoole homework style
    \rfoot{\itshape Page {\thepage} of \pageref{LastPage}} % Page X of Y
    \renewcommand{\maketitle}{%
      \setlength{\parindent}{0pt}
      {\Large\@title}\hfill
      \@author\\
+
      \noindent\titlehrule[0.8 mm] % Use a 0.8mm tick header rule. 
 
      \begin{flushright}
-      \LING@profname \\
-      \unless\ifx\coursename\@empty
-         \textbf{\uclalingcoursename} \\
-      \fi
-      \textbf{Due: \uclalingduedate}
+       \unless\ifx\uclalingprofname\@empty
+         \textbf{\uclalingprofname} \\
+       \fi
+       \unless\ifx\uclalingcoursename\@empty
+          \textbf{\uclalingcoursename} \\
+       \fi
+        \textbf{Due: \uclalingduedate}
      \end{flushright}
     }
   }{% 'epoole' non-homework option
@@ -187,6 +199,7 @@
        % Left Header
        {\Large \@title}\hfill
        \@author \\
+       
        \noindent\titlehrule[0.4mm]
 
        \begin{flushright}

@@ -55,7 +55,6 @@
 \DeclareBoolOption{doublespace}
 \DeclareBoolOption{onehalfspace}
 % Linguistics Package Options
-\DeclareBoolOption{notipa}
 \DeclareBoolOption{nogloss} % Alias to elide gb4e and expex
 \DeclareBoolOption{nogb4e}
 \DeclareBoolOption{automath}
@@ -138,7 +137,6 @@
 
 \def\orglingfont{\ORGLING@font}
 
-
 \RequirePackage[calc,en-US]{datetime2}
 \DTMlangsetup[en-US]{showdayofmonth=true}
 
@@ -159,11 +157,14 @@
       profname={Ethan Poole},
       \ORGLING@type
     }{uclaling}
-  }{\PassOptionsToPackage{style={\orglingstyle}}{uclaling}}
+  }{%
+    \PassOptionsToPackage{style={\orglingstyle}}{uclaling}
+  }
 \fi
 \PassOptionsToPackage{\orglingfont}{uclaling}
 
 \RequirePackage{uclaling}
+
 
 \ifthenelse{\boolean{ORGLING@nographicx}}{}{\RequirePackage{graphicx}}
 \ifthenelse{\boolean{ORGLING@nolongtable}}{}{\RequirePackage{longtable}}
@@ -233,23 +234,20 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % Linguistics Packages
 %%%%%%%%%%%%%%%%%%%%%%%%%
-% \unless\ifx\ORGLING@nogloss \fi
 \ifthenelse{\boolean{ORGLING@nogb4e}}{%
-  \AtEndOfClass{
-    \RequirePackage{gb4e}
+  \RequirePackage{expex}
+  \definelingstyle{exarrbelow}{belowexskip=1em plus 0.375em minus 0.25em}
+}{
+  \AtEndPreamble{
+  \RequirePackage{gb4e}
     \unless\ifx\ORGLING@automath
-      \noautomath
+    \noautomath
     \fi
-  }{%
-    \AtEndOfClass{
-      \RequirePackage{expex}
-      \definelingstyle{exarrbelow}{belowexskip=1em plus 0.375em minus 0.25em} 
-    }
   }
-}{}
+}
+
 
 \ifthenelse{\boolean{ORGLING@noforest}}{}{%
-  \RequirePackage{adjustbox}
   \RequirePackage{tikz}
   \usetikzlibrary{positioning,shapes,fit,arrows.meta,calc}
   \tikzset{
@@ -257,7 +255,8 @@
     semithick,
       arrows={%
         -Stealth[
-          scale=1, scale length=1,
+          scale=1,
+          scale length=1,
           scale width=1
         ]
       }
@@ -273,32 +272,101 @@
   \DeclareDocumentCommand \ND {s m m} {%
     \tikzifinpicture{}{\tikz}\node(#2){\IfBooleanTF{#1}{\strut}{}#3};}
   \RequirePackage[linguistics,edges]{forest}
+  \forestset{
+    % Begin nice nodes
+    nice nodes/.style={
+      for tree={
+        inner sep=1 pt,
+        s sep=12pt,
+        fit=band
+      }
+    },
+    % Begin fairly nice empty nodes
+    fairly nice empty nodes/.style={
+      delay={
+        where content={}{
+          shape=coordinate,
+          for parent={
+            for children={anchor=north}
+          }
+        }
+      }
+    },
+    % Begin pretty nice empty nodes
+    pretty nice empty nodes/.style={
+      for tree={
+        calign=fixed edge angles,
+        parent anchor=children,
+        delay={
+          if content={}{
+            inner sep=0pt,
+            edge path={
+              \noexpand\path [\forestoption{edge}] (!u.parent anchor) --
+              (.children)\forestoption{edge label} ;
+            }
+          }{}
+        }
+      }
+    },
+    % Begin perfectly nice empty nodes
+    perfectly nice empty nodes/.style={
+      for tree={
+        calign=fixed edge angles,
+        parent anchor=south
+      },
+      before typesetting nodes={
+        where content={}{
+          text width=.001pt,
+          inner sep=0pt,
+          before drawing tree={
+            shape=coordinate,
+            typeset node
+          },
+          for parent={
+            for children={
+              anchor=north
+            }
+          }
+        }{}
+      }
+    }
+  }
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Commands
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % https://tex.stackexchange.com/questions/132783/how-to-write-checkmark-in-latex
-\newcommand*{\boldcheckmark}{%
-  \textpdfrender{
-    TextRenderingMode=FillStroke,
-    LineWidth=.5pt, % half of the line width is outside the normal glyph
-  }{\checkmark}%
-}
+\ifpdf
+  \newcommand*{\boldcheckmark}{%
+    \textpdfrender{
+      TextRenderingMode=FillStroke,
+      LineWidth=.5pt, % half of the line width is outside the normal glyph
+    }{\checkmark}%
+  }
+\else
+ \newcommand*{\boldcheckmark}{\textbf{$✓$}}
+\fi
 
-\newcommand{\sfeat}[1]{[\textbullet#1\textbullet]}
-\newcommand{\sfeatc}[1]{\sfeat{#1} \boldcheckmark}
-\newcommand{\sfeats}[1]{\sout{\sfeat{#1}}}
-\newcommand{\pfeat}[1]{$[$+#1+$]$}
+\newcommand{\nl}{$\varnothing$}
+\newcommand{\ml}[1]{\textsc{#1}}
+
+\newcommand{\self}[1]{$[$\textbullet#1\textbullet$]$}
+\newcommand{\sself}[1]{\self{#1} \boldcheckmark}
+\newcommand{\ssself}[1]{\sout{\self{#1}}}
+
+\newcommand{\plusfeat}[1]{$[$+#1+$[$}
+\newcommand{\pplusfeat}[1]{$[$\sout{\plusfeat{#1}}$[$}
+\newcommand{\ppplusfeat}[1]{\sout{\self{#1}}}
+
 \newcommand{\pagree}[1]{$[\star\pi$: #1 $*]$}
-\newcommand{\nagree}[1]{$[\star\#$: #1 $*]$}
 \newcommand{\ppagree}[1]{$[\pi$: #1$]$}
-\newcommand{\nnagree}[1]{$[\#$: #1$]$}
-\newcommand{\pfeatc}[1]{\plusf{#1} $\boldcheckmark$}
 
+\newcommand{\nagree}[1]{$[\star\#$: #1 $*]$}
+\newcommand{\nnagree}[1]{$[\#$: #1$]$}
 
 \newcommand{\tns}[1]{Tns$_{\text{#1}}$}
-\newcommand{\proj}[1]{$\overline{\text{#1}}$} % Deprecated
+
 
 
 
