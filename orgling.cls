@@ -112,12 +112,12 @@
   \ifx\CurrentOptionValue\relax
   % Expand \CurrentOption
   \expandafter\PassOptionsToClass
-  \expandafter{\CurrentOption}{article}%
+  \expandafter{\CurrentOption}{memoir}%
   \else
     \@unknownoptionerror
   \fi
 }
-\PassOptionsToClass{a4paper}{article}
+\PassOptionsToClass{article,oneside,oldfontcommands,11pt}{memoir}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Process Options
@@ -125,7 +125,7 @@
 \ProcessKeyvalOptions*
 
 % Load 'article' Class
-\LoadClass{article}
+\LoadClass{memoir}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Package Loading
@@ -164,7 +164,6 @@
 \PassOptionsToPackage{\orglingfont}{uclaling}
 
 \RequirePackage{uclaling}
-
 
 \ifthenelse{\boolean{ORGLING@nographicx}}{}{\RequirePackage{graphicx}}
 \ifthenelse{\boolean{ORGLING@nolongtable}}{}{\RequirePackage{longtable}}
@@ -207,16 +206,18 @@
   }
 }
 
+
 \ifpdf
   \ifthenelse{\boolean{ORGLING@nopdfrender}}{}{\RequirePackage{pdfrender}}
 \fi
 
-% \ifthenelse{\boolean{ORGLING@nonatbib}}{}{%
-%   \RequirePackage[longnamesfirst]{natbib}
-%   \setcitestyle{authoryear,round,semicolon,%
-%   aysep={}, yysep={,}, notesep={:}}
-%   \RequirePackage[version=3]{mhchem}
-% }
+\RequirePackage{booktabs}
+\ifthenelse{\boolean{ORGLING@nonatbib}}{}{%
+  \RequirePackage[longnamesfirst]{natbib}
+  \setcitestyle{authoryear,round,semicolon,%
+  aysep={}, yysep={,}, notesep={:}}
+  \RequirePackage[version=3]{mhchem}
+}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % Optional Packages
@@ -244,6 +245,7 @@
     \noautomath
     \fi
   }
+  
 }
 
 
@@ -348,6 +350,7 @@
  \newcommand*{\boldcheckmark}{\textbf{$✓$}}
 \fi
 
+
 \newcommand{\nl}{$\varnothing$}
 \newcommand{\ml}[1]{\textsc{#1}}
 
@@ -366,7 +369,3 @@
 \newcommand{\nnagree}[1]{$[\#$: #1$]$}
 
 \newcommand{\tns}[1]{Tns$_{\text{#1}}$}
-
-
-
-
