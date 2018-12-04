@@ -67,6 +67,10 @@
 \fi
 \ifLING@stix % 'stix' option
   \setboolean{uselibertine}{false}
+
+  \setmonofont{Latin Modern Mono Light}[
+    SmallCapsFont = {Latin Modern Mono Caps}
+  ]
   % Set the math font to Stix Two Math.
   \setmathfont{STIX2Math}[
     Extension = .otf,
@@ -105,6 +109,9 @@
     \setmonofont{Latin Modern Mono Light}[
       SmallCapsFont = {Latin Modern Mono Caps}
     ]
+
+    \RequirePackage[supstfm=libertinesups,supscaled=1.125,raised=0em]{superiors}
+    \renewcommand{\baselinestretch}{1.15}
   \else
     % Recommended math font for xtmath
     % \RequirePackage[libertine]{newxtmath}
@@ -149,42 +156,16 @@
 % Opinionated formatting for LaTeX documents
 %  in the format of UCLA syntax professor
 %  Ethan Poole.
+% Create a header rule with variable height.
+% From https://tex.stackexchange.com/a/17130
+\newcommand*\titlehrule[1][0.4pt]{%
+  \leavevmode\leaders\hrule height#1\hfill\kern0pt
+}
+\renewcommand{\thesection}{\arabic{section}}
+
 \ifthenelse{\equal{\LING@style}{epoole}}{%
   \RequirePackage{pifont}
   \RequirePackage{xspace}
-  % Helpful short hands.
-  \newcommand{\vP}[0]{\textit{v}P\xspace}
-  \newcommand{\littlev}[0]{\textit{v}\xspace}
-
-  % Data macros.
-  \newcommand{\objlang}[2][]{\textit{#2}\ifx&#1&\else\ `#1'\fi}
-  \newcommand{\ja}[0]{\ding{51}}
-  % \newcommand{\lb}[2]{\ensuremath{[_\text{#1}\,\text{#2}\,]}}
-  \newcommand{\gap}[0]{\rule[-1.25pt]{1.5em}{0.75pt}\,}
-  \newcommand{\ind}[1]{\ensuremath{_{#1}}}
-
-  % Features.
-  \newcommand{\feature}[1]{{\scshape [#1]}}
-  \newcommand{\mf}[1]{\feature{$\bullet$#1$\bullet$}}
-  \newcommand{\hf}[1]{\feature{$+$#1$+$}}
-    \newcommand{\agrf}[1]{\feature{$\star$#1$\star$}}
-
-  % Satisfied features.
-  \newcommand{\shf}[1]{\hf{#1}{\scriptsize\,\ja}}
-  \newcommand{\smf}[1]{\mf{#1}{\scriptsize\,\ja}}
-  \newcommand{\sagrf}[1]{\agrf{#1}{\scriptsize\,\ja}}
-
-  % Phrase structure.
-  \newcommand{\head}[1]{#1$^0$}
-  \newcommand{\spec}[1]{\mbox{[Spec, #1]}}
-  \newcommand{\comp}[1]{\mbox{[Comp, #1]}}
-  \newcommand{\xbar}[1]{$\overline{\textrm{#1}}$}
-
-  % Semantics.
-  \newcommand{\denotation}[1]{\denotationbase{\text{#1}}}
-  \newcommand{\denotationbase}[1]{\ensuremath{\left\lsem#1\right\rsem}}
-  \newcommand{\startfn}[0]{\ensuremath{\ .\ }}
-    
   % Text area dimensions.
   \settypeblocksize{7.75in}{32pc}{*}
   \setlrmargins{*}{*}{1}
@@ -195,11 +176,7 @@
  \RequirePackage[bottom,hang,multiple,norule]{footmisc}
  \renewcommand{\footnotemargin}[0]{1.25em}
 
-  % Create a header rule with variable height.
-  % From https://tex.stackexchange.com/a/17130
-  \newcommand*\titlehrule[1][0.4pt]{%
-    \leavevmode\leaders\hrule height#1\hfill\kern0pt
-  }
+
   \pagestyle{fancyplain}
   \renewcommand{\headrulewidth}{0mm}%
   \fancyhf{} % Clear header
@@ -208,7 +185,7 @@
   \ifthenelse{\boolean{LING@homework}}{% epoole homework style
     \renewcommand{\maketitle}{%
       \setlength{\parindent}{0pt}
-      {\Large\@title}\hfill
+      {\huge \bfseries\@title}\hfill
       \@author\\
       \noindent\titlehrule[0.8 mm] % Use a 0.8mm tick header rule.
       \begin{flushright}
@@ -228,20 +205,18 @@
      % \ifthenelse{\boolean{uselibertine}}{}{%
      %   \uclaling@DisableOption{undef}{libertine}
      % }
-      
+
    \renewcommand{\maketitle}{%
      \setlength{\parindent}{0pt}
      % Left Header
-     {\Large \@title}\hfill  \@author \\
-   
-     \noindent\titlehrule[0.8mm]
+     {\LARGE \bfseries\@title}\\\smallskip
+     \noindent\titlehrule[0.4mm]
      \begin{flushright}
+       \@author \\
        \unless\ifx\uclalingassignment\@empty
          \uclalingassignment \\
        \fi
-       \unless\ifx\uclalingcoursename\@empty
-         \textbf{\uclalingcoursename} \\
-       \fi
+       {\scshape \uclalingcoursenumber} :  \uclalingcoursename \\
        \uclalingduedate
      \end{flushright}
    }
@@ -253,24 +228,37 @@
   \RequirePackage{phonrule}
   \RequirePackage{phonenumbers}
   \RequirePackage{ipaex-type1}
-}{% no style option given
-    \renewcommand{\maketitle}{%
-      \setlength{\parindent}{0pt}
-      {\LARGE \@title} \\\\\medskip
+
+  \def\phonesubtitle{}
+
+  \unless\ifx\uclalingcoursenumber\@empty
+  \def\phonesubtitle{\uclalingcoursenumber}
+  \fi
+
+  \unless\ifx\uclalingcoursenumber\@empty
+  \let\oldphonesubtitle\phonesubtitle
+  \def\phonesubtitle{\oldphonesubtitle -- \uclalingcoursename}
+  \fi
+
+  \renewcommand{\maketitle}{%
+    \setlength{\parindent}{0pt}
+    {\LARGE \@title} \\
+    \unless\ifx\phonesubtitle\@empty
+    {\large \itshape \phonesubtitle} \\
+    \fi \medskip
+    \noindent\titlehrule[0.4mm]
       \begin{flushright}
         \@author \\
         \unless\ifx\uclalingcoursenumber\@empty
-          \uclalingcoursenumber \\
+        \uclalingcoursenumber \\
         \fi
           \uclalingduedate
       \end{flushright}
     }
-  }
+ }{}
 }
+
 \setlength{\parskip}{0.5\baselineskip plus2pt minus2pt}
 \setlength{\parindent}{2pt}
 
 \endinput
-
-
-
