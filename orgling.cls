@@ -11,7 +11,6 @@
 \RequirePackage{remreset}
 \RequirePackage{etoolbox}
 \RequirePackage{xstring}
-\RequirePackage{ifthen}
 \RequirePackage[patch,debugshow]{kvoptions}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
