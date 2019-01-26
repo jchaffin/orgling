@@ -60,7 +60,7 @@
 \DeclareBoolOption{automath}
 \DeclareBoolOption{noforest}
 \DeclareBoolOption{nodatetime2}
-%% Font options pass to 'uclaling.sty'
+%% Font options pass to 'oldling.sty'
 % Setup font options
 % See pg. 9 Section 3 Example of kvoptions package
 % https://ctan.org/pkg/kvoptions
@@ -124,12 +124,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \ProcessKeyvalOptions*
 
-% Load 'article' Class
+% Load 'memoir' Class
 \LoadClass{memoir}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Package Loading
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \unless\ifx\ORGLING@assignment\relax\@empty
   \PassOptionsToPackage{assignment={\ORGLING@assignment}}{uclacs}
@@ -145,26 +144,10 @@
   \def\duedate{\DTMDate{\ORGLING@duedate}}
 \fi
 
-\PassOptionsToPackage{duedate={\duedate}}{uclaling}
+\PassOptionsToPackage{duedate={\duedate}}{oldling}
+\PassOptionsToPackage{\orglingfont}{oldling}
 
-\unless\ifx\ORGLING@style\relax\@empty
-  \def\orglingstyle{\ORGLING@style}
-  \ifthenelse{\equal{\orglingstyle}{epoole}}{%
-    \renewcommand{\orglingfont}{libertine}
-    \PassOptionsToPackage{
-      style=epoole,
-      coursename={Syntax II},
-      coursenumber={Ling 165B},
-      profname={Ethan Poole},
-      \ORGLING@type
-    }{uclaling}
-  }{%
-    \PassOptionsToPackage{style={\orglingstyle}}{uclaling}
-  }
-\fi
-\PassOptionsToPackage{\orglingfont}{uclaling}
-
-\RequirePackage{uclaling}
+\RequirePackage{oldling}
 
 \ifthenelse{\boolean{ORGLING@nographicx}}{}{\RequirePackage{graphicx}}
 \ifthenelse{\boolean{ORGLING@nolongtable}}{}{\RequirePackage{longtable}}
