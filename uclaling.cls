@@ -48,13 +48,15 @@
 \PassOptionsToClass{article,oneside,oldfontcommands,11pt}{memoir}
 \ProcessKeyvalOptions* % Process Options
 \LoadClass{memoir} % Load Class
+\let\LING@duedate\relax
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Figures, Lists, and Tables
+%% Figures, Markup, Lists, and Tables
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \RequirePackage{graphicx}
 \RequirePackage[dvipsnames,x11names,table]{xcolor}
 \RequirePackage{iitem} % Multiple level lists
 \RequirePackage{paralist} % enumerated items in paragraphs
+\RequirePackage{ulem}
 \RequirePackage{float} % Float environments
 \RequirePackage{wrapfig} % Wrap text around float
 \RequirePackage{rotating} % Rotate environment
@@ -65,7 +67,6 @@
 \RequirePackage{booktabs} % The nicest tables
 \RequirePackage{tabularx} %  Adjust by column width instead of column spaces
 \RequirePackage{tabulary} % Adjust by row height instead of row space
-\RequirePackage{ctable} % Extended caption and footnote formatting in table floats
 \RequirePackage{dcolumn} % Dynamic columns
 \RequirePackage{rccol} % Right cented table column 'R' option
 \RequirePackage{multicol} % Multiple columns
@@ -81,6 +82,12 @@
 \setmathfont{STIX Two Math}[StylisticSet=02,StylisticSet=08] % Math font
 \setmonofont[Scale=MatchUppercase]{DejaVu Sans Mono} % Monospace Font
 \fi
+
+\ifxetex
+\RequirePackage{stoneipa}
+\newcommand\ipa[1]{{\sipafont #1}}
+\fi
+
 \RequirePackage{soul} % strike through and underline
 \RequirePackage{marvosym}
 \RequirePackage[fleqn,tbtags]{mathtools}
@@ -91,7 +98,6 @@
  {\@gobbletwo}
  {\@gobblethree}
  {}{}
-\RequirePackage{cabin} % Sans Serif font
 \RequirePackage{stmaryrd} % growing delimiters and additiona math symbols
 \RequirePackage{bussproofs} % derivational proofs
 \AtBeginEnvironment{bussproofs}{\def\extraVskip{8pt}}
@@ -187,6 +193,8 @@
   \noautomath
 }
 \RequirePackage{tikz}
+% ctable must be loaded after tikz
+\RequirePackage{ctable} % Extended caption and footnote formatting in table floats
 \RequirePackage[linguistics,edges]{forest} % linguistic trees
 \forestset{ % tree styles
   nice nodes/.style={% 1. nice nodes
@@ -257,8 +265,10 @@
   \ifthenelse{\equal{\LING@subject}{syntax}}{\syntaxtrue}{\syntaxfalse}
   \ifthenelse{\equal{\LING@subject}{phonetics}}{\phoneticstrue}{\phoneticsfalse}
 }
+
 \ifphonetics % Phonetics packages
 \RequirePackage{phonetic} % Phonetics macros
+\RequirePackage{vowel}
 \RequirePackage{phonrule}
 \RequirePackage{phonenumbers}
 \RequirePackage{ipaex-type1}
@@ -321,37 +331,55 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Document Structure and Formatting
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\RequirePackage{pifont}
-\RequirePackage{marginnote} % Margin notes
-% Text area dimensions.
-\settypeblocksize{7.75in}{32pc}{*}
-\setlrmargins{*}{*}{1}
-\setulmargins{*}{*}{1}
-\checkandfixthelayout
-\raggedbottom
-\RequirePackage{changepage}
-\RequirePackage{lastpage}
+
+
+
+\ifthenelse{\boolean{phonetics}\and\not\boolean{syntax}\and\not\boolean{semantics}}{%
+\RequirePackage{geometry}
+\geometry{%
+  paperwidth=216mm, paperheight=303mm,
+  left=23mm,  %% or inner=23mm
+  right=18mm, %% or outer=18mm
+  top=23mm, bottom=23mm,
+  headheight=\baselineskip,
+  headsep=7mm,
+  footskip=7mm
+ }
+ \renewcommand{\thesection}{\arabic{section}}
+ }{%
+  \settypeblocksize{7.75in}{32pc}{*}
+  \setlrmargins{*}{*}{1}
+  \setulmargins{*}{*}{1}
+  \checkandfixthelayout
+  \raggedbottom
+}
+
+\RequirePackage{cabin}
+
 \newcommand*\titlehrule[1][0.4pt]{%
   \leavevmode\leaders\hrule height#1\hfill\kern0pt
 }
+
+\RequirePackage{changepage}
+\RequirePackage{lastpage}
 \let\footruleskip\undefined % https://tex.stackexchange.com/a/37880
 \RequirePackage{fancyhdr}
 \pagestyle{fancyplain}
 \renewcommand{\headrulewidth}{0mm}%
 \fancyhf{} % Clear header
 \rfoot{\itshape Page {\thepage} of \pageref{LastPage}} % 'Page X of Y' footer
-\def\duedate{\@date}
-\unless\ifx\LING@duedate\@empty
+
 \RequirePackage[calc,en-US]{datetime2}
 \DTMlangsetup[en-US]{showdayofmonth=true}
+\AtBeginDocument{\let\today\DTMtoday}
+\def\duedate{\today}
+\unless\ifx\LING@duedate\relax
 \renewcommand{\duedate}{\DTMDate{\LING@duedate}}
 \fi
+
 \newcommand{\definestyle}[1]{
  \lowercase{\def\tmpA{#1}}%
  \newboolean{\tmpA}
- \ifx\LING@profname\@empty
- \setboolean{\tmpA}{false}
- \else
  \newif\ifsplit
  \IfSubStr{\LING@profname}{}{\splittrue}{\splitfalse}
  \ifsplit
@@ -361,7 +389,6 @@
  \fi
  \StrGobbleLeft{\csB}{1}[\tmpB]%
  \IfEndWith{#1}{\tmpB}{\setboolean{\tmpA}{true}}{\setboolean{\tmpA}{false}}
- \fi
 }
 \definestyle{poole}
 \definestyle{bumford}
@@ -444,8 +471,6 @@
   \smallskip\noindent\titlehrule[0.4mm]
   \begin{flushright} \pooletitle \end{flushright}
 }
-\else % default title command
-\let\lingtitle\maketitle
 \fi\fi
 \let\maketitle\lingtitle
 \endinput %%% uclaling.cls ends here.
