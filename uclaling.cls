@@ -45,7 +45,7 @@
     \@unknownoptionerror
   \fi
 }
-\PassOptionsToClass{article,oneside,oldfontcommands,11pt}{memoir}
+\PassOptionsToClass{article,oneside,oldfontcommands,a4paper,11pt}{memoir}
 \ProcessKeyvalOptions* % Process Options
 \LoadClass{memoir} % Load Class
 \let\LING@duedate\relax
@@ -74,12 +74,15 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Fonts, Symbols, and Maths
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\RequirePackage{amsmath}
 \ifxetex
+\RequirePackage[fleqn,tbtags]{mathtools}
 \RequirePackage{fontspec} % Open type fonts
-\RequirePackage{unicode-math} % Support unicode input
+\RequirePackage[math-style=upright]{unicode-math} % Support unicode input
 \setmainfont{STIX Two Text} % Default Font
 \setmathfont{STIX Two Math}[StylisticSet=02,StylisticSet=08] % Math font
+\RequirePackage{fixmath}
+% \SetMathAlphabet{\mathit}{normal}{OML}{\rmdefault}{m}{n}
+
 \setmonofont[Scale=MatchUppercase]{DejaVu Sans Mono} % Monospace Font
 \fi
 
@@ -90,7 +93,6 @@
 
 \RequirePackage{soul} % strike through and underline
 \RequirePackage{marvosym}
-\RequirePackage[fleqn,tbtags]{mathtools}
 \RequirePackage{arcs} % overarc
 % https://tex.stackexchange.com/a/409041
 \providecommand\@gobblethree[3]{}
@@ -101,6 +103,12 @@
 \RequirePackage{stmaryrd} % growing delimiters and additiona math symbols
 \RequirePackage{bussproofs} % derivational proofs
 \AtBeginEnvironment{bussproofs}{\def\extraVskip{8pt}}
+\alwaysRootAtTop
+\newenvironment{sprooftree}[1]% https://tex.stackexchange.com/a/105748
+  {\gdef\scalefactor{#1}\begin{center}\proofSkipAmount \leavevmode}%
+  {\scalebox{\scalefactor}{\DisplayProof}\proofSkipAmount \end{center} }
+
+
 \RequirePackage{minted} % Syntax highlighting
 \AtBeginEnvironment{minted}{% Remove red boxing around syntax errors
   \renewcommand{\fcolorbox}[4][]{#4}
@@ -139,30 +147,16 @@
 ]{thmsty}
 \declaretheorem[style=thmsty,numberwithin=section]{theorem} % theorems
 \declaretheorem[style=thmsty,]{definition} % definitions
-\declaretheoremstyle[% problem style
-  mdframed={
-     skipabove=8pt,
-     skipbelow=6pt,
-     nobreak=true,
-     hidealllines=false,
-     innerleftmargin=-3pt,
-     innerrightmargin=5pt,
-     align=center
-   },
-   spaceabove=3pt,spacebelow=3pt,%
-   headfont=\normalfont\bfseries,%
-   notefont=\normalfont\bfseries,%
-   notebraces={}{. },%
-   headpunct={},%
-   postheadspace=0pt,%
-   postheadhook={\hangindent16pt},
-   headindent=0pt,%
-   bodyfont=\normalfont,%
-   headformat={\llap{\smash{\parbox[t]{0.8in}{\centering \NUMBER}}} \hspace{8pt}},%
-]{probsty}
+%% Problem
+\RequirePackage{framed}
+\RequirePackage{marginnote}
 \newcounter{prob}[section]
 \newcounter{subprob}[prob]
-\declaretheorem[style=probsty,numberwithin=prob]{problem}
+\newenvironment{problem}[1][]
+{\refstepcounter{subprob}\raggedleftmarginnote{\textbf{\theprob.\thesubprob}\hspace{2mm}} \begin{minipage}[c]{0.9\textwidth}\FrameSep10pt\begin{framed} #1}
+    {\end{framed}\end{minipage}\medskip}
+
+
 %% Bibliography
 \RequirePackage[longnamesfirst]{natbib}
 \setcitestyle{authoryear,round,semicolon,aysep={}, yysep={,}, notesep={:}}
@@ -194,7 +188,8 @@
 }
 \RequirePackage{tikz}
 % ctable must be loaded after tikz
-\RequirePackage{ctable} % Extended caption and footnote formatting in table floats
+\RequirePackage{ctable} % Extended caption and footnote
+\RequirePackage{adjustbox}
 \RequirePackage[linguistics,edges]{forest} % linguistic trees
 \forestset{ % tree styles
   nice nodes/.style={% 1. nice nodes
@@ -278,7 +273,7 @@
 \newcommand{\denotationbase}[1]{\ensuremath{\left\lsem#1\right\rsem}}
 \newcommand{\startfn}[0]{\ensuremath{\ .\ }}
 \newcommand{\sem}[2][M\!,g]{\mbox{ $[\![ #2 ]\!]^{#1}$}}
-\newcommand{\vb}[0]{\text{ | }}
+\newcommand{\vb}[0]{\text{\,|\, }}
 \newcommand{\arc}[2]{\overarc{$#1$$#2$}}
 \fi
 \ifsyntax % Syntax Packages
@@ -333,9 +328,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-
-\ifthenelse{\boolean{phonetics}\and\not\boolean{syntax}\and\not\boolean{semantics}}{%
 \RequirePackage{geometry}
+\ifthenelse{\equal{phonetics}{\LING@subject}}{%
 \geometry{%
   paperwidth=216mm, paperheight=303mm,
   left=23mm,  %% or inner=23mm
@@ -347,11 +341,14 @@
  }
  \renewcommand{\thesection}{\arabic{section}}
  }{%
+  \geometry{margin=1in}
   \settypeblocksize{7.75in}{32pc}{*}
-  \setlrmargins{*}{*}{1}
-  \setulmargins{*}{*}{1}
+  \setlrmarginsandblock{3.5cm}{2.5cm}{*}
+  \setulmarginsandblock{2.5cm}{*}{1}
+  % \setlrmargins{*}{*}{1}
+  % \setulmargins{*}{*}{1}
   \checkandfixthelayout
-  \raggedbottom
+  % \raggedbottom
 }
 
 \RequirePackage{cabin}
@@ -393,17 +390,19 @@
 \definestyle{poole}
 \definestyle{bumford}
 \newcommand{\lingtitle}[0]{}
+\ifthenelse{\equal{\LING@style}{bumford}}{\bumfordtrue}{}
 \ifbumford % use bumford style
 \let\bumfordtitle\lingtitle
 \unless\ifx\LING@coursenumber\@empty
-\g@addto@macro\bumfordtitle{\textsc{\LING@coursenumber}: \@title\newline}
+\g@addto@macro\bumfordtitle{\textbf{\scshape {\LING@coursenumber}}: \@title\newline}
 \fi
 \unless\ifx\LING@profname\@empty
 \g@addto@macro\bumfordtitle{\LING@profname\newline}
 \fi
 \renewcommand{\lingtitle}{
   \bgroup\setlength{\parindent}{0pt}%
-  \bumfordtitle{}
+  \bumfordtitle{}\\
+  \smallskip\noindent\titlehrule[0.4mm]
   \begin{flushright}\@author\\\@date\\\end{flushright}\medskip
 }
 \else\ifpoole % use poole style
