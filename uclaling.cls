@@ -104,6 +104,7 @@
 \RequirePackage{bussproofs} % derivational proofs
 \AtBeginEnvironment{bussproofs}{\def\extraVskip{8pt}}
 \alwaysRootAtTop
+\newcommand{\Rule}[1]{\RightLabel{$\mathbf{#1}$}}
 \newenvironment{sprooftree}[1]% https://tex.stackexchange.com/a/105748
   {\gdef\scalefactor{#1}\begin{center}\proofSkipAmount \leavevmode}%
   {\scalebox{\scalefactor}{\DisplayProof}\proofSkipAmount \end{center} }
