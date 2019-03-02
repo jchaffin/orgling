@@ -35,7 +35,7 @@
 \DeclareStringOption{profemail} % professor email
 \DeclareStringOption{quarter}
 \DeclareStringOption[all]{subject} % One of 'all', 'phonetic', 'semantics', 'syntax
-\DeclareStringOption[none]{style} % current options 'bumford', 'epoole', or 'none'
+\DeclareStringOption[none]{style} % current options 'bumford', 'poole', or 'none'
 \DeclareDefaultOption{%
   \ifx\CurrentOptionValue\relax
   % Expand \CurrentOption
@@ -53,7 +53,7 @@
 %% Figures, Markup, Lists, and Tables
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \RequirePackage{graphicx}
-\RequirePackage[dvipsnames,x11names,table]{xcolor}
+\RequirePackage[usenames,dvipsnames,x11names,table]{xcolor}
 \RequirePackage{iitem} % Multiple level lists
 \RequirePackage{paralist} % enumerated items in paragraphs
 \RequirePackage{ulem}
@@ -157,7 +157,6 @@
 {\refstepcounter{subprob}\raggedleftmarginnote{\textbf{\theprob.\thesubprob}\hspace{2mm}} \begin{minipage}[c]{0.9\textwidth}\FrameSep10pt\begin{framed} #1}
     {\end{framed}\end{minipage}\medskip}
 
-
 %% Bibliography
 \RequirePackage[longnamesfirst]{natbib}
 \setcitestyle{authoryear,round,semicolon,aysep={}, yysep={,}, notesep={:}}
@@ -166,14 +165,21 @@
 %% Counters, Cross References, and Hyperlinks
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \RequirePackage{hyperref}
-\colorlet{lingurlcolor}{black}
+\colorlet{lingurlcolor}{MidnightBlue}
 \AtEndPreamble{
   \hypersetup{
     colorlinks=true,linkcolor=black,
     filecolor=black,citecolor=black,
     urlcolor=lingurlcolor
   }
-  \urlstyle{rm}
+  \RequirePackage{url}
+  \urlstyle{sf}
+  \let\UrlSpecialsOld\UrlSpecials
+  \def\UrlSpecials{\UrlSpecialsOld\do\/{\Url@slash}\do\_{\Url@underscore}}%
+  \def\Url@slash{\@ifnextchar/{\kern-.11em\mathchar47\kern-.2em}%
+    {\kern-.0em\mathchar47\kern-.08em\penalty\UrlBigBreakPenalty}}
+  \def\Url@underscore{\nfss@text{\leavevmode \kern.06em\vbox{\hrule\@width.3em}}}
+
 }
 \RequirePackage{nameref} % label references
 \RequirePackage{smartref} % extended references
@@ -362,6 +368,7 @@
 \else
 \rfoot{\itshape Page {\thepage} of \pageref{LastPage}} % 'Page X of Y' footer
 \fi
+\PassOptionsToPackage{bottom,hang,multiple}{footmisc}
 \RequirePackage[calc,en-US, showdow]{datetime2}
 \DTMlangsetup[en-US]{showdayofmonth=true}
 \newcommand{\definestyle}[1]{
@@ -396,6 +403,7 @@
   \begin{flushright}\@author\\\@date\\\end{flushright}\medskip
 }
 \else\ifpoole % use poole style
+\PassOptionsToPackage{norule}{footmisc}
 \RequirePackage[p]{libertine}
 % See  Manual for Linux Libertine with XeTeX
 % http://linuxlibertine.sourceforge.net/Libertine-XeTex-EN.pdf
@@ -475,5 +483,7 @@
     \end{center}\egroup
   }
 \fi
+\RequirePackage{footmisc}
+\renewcommand{\footnotemargin}[0]{1.25em}
 \let\maketitle\lingtitle
 \endinput %%% uclaling.cls ends here.
