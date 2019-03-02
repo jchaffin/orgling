@@ -33,7 +33,7 @@
 \DeclareStringOption{assignmentnumber} % e.g 'Squib 3'
 \DeclareStringOption{profname} % professor name
 \DeclareStringOption{profemail} % professor email
-\DeclareStringOption{duedate} % parse a due date
+\DeclareStringOption{quarter}
 \DeclareStringOption[all]{subject} % One of 'all', 'phonetic', 'semantics', 'syntax
 \DeclareStringOption[none]{style} % current options 'bumford', 'epoole', or 'none'
 \DeclareDefaultOption{%
@@ -102,7 +102,7 @@
  {}{}
 \RequirePackage{stmaryrd} % growing delimiters and additiona math symbols
 \RequirePackage{bussproofs} % derivational proofs
-\AtBeginEnvironment{bussproofs}{\def\extraVskip{8pt}}
+\AtBeginEnvironment{prooftree}{\def\extraVskip{8pt}}
 \alwaysRootAtTop
 \newcommand{\Rule}[1]{\RightLabel{$\mathbf{#1}$}}
 \newenvironment{sprooftree}[1]% https://tex.stackexchange.com/a/105748
@@ -256,10 +256,12 @@
 \newif\ifsemantics
 \newif\ifsyntax
 \newif\ifphonetics
+\newif\ifonlyphonetics
 \ifthenelse{\equal{\LING@subject}{all}}{\semanticstrue\syntaxtrue\phoneticstrue}{%
   \ifthenelse{\equal{\LING@subject}{semantics}}{\semanticstrue}{\semanticsfalse}
   \ifthenelse{\equal{\LING@subject}{syntax}}{\syntaxtrue}{\syntaxfalse}
-  \ifthenelse{\equal{\LING@subject}{phonetics}}{\phoneticstrue}{\phoneticsfalse}
+  \ifthenelse{\equal{\LING@subject}{phonetics}}{\phoneticstrue
+    \onlyphoneticstrue}{\phoneticsfalse \onlyphoneticsfalse}
 }
 
 \ifphonetics % Phonetics packages
@@ -328,29 +330,17 @@
 % Document Structure and Formatting
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\renewcommand{\thesection}{\arabic{section}}
 
-\RequirePackage{geometry}
-\ifthenelse{\equal{phonetics}{\LING@subject}}{%
-\geometry{%
-  paperwidth=216mm, paperheight=303mm,
-  left=23mm,  %% or inner=23mm
-  right=18mm, %% or outer=18mm
-  top=23mm, bottom=23mm,
-  headheight=\baselineskip,
-  headsep=7mm,
-  footskip=7mm
- }
- \renewcommand{\thesection}{\arabic{section}}
- }{%
-  \geometry{margin=1in}
-  \settypeblocksize{7.75in}{32pc}{*}
-  \setlrmarginsandblock{3.5cm}{2.5cm}{*}
-  \setulmarginsandblock{2.5cm}{*}{1}
-  % \setlrmargins{*}{*}{1}
-  % \setulmargins{*}{*}{1}
-  \checkandfixthelayout
-  % \raggedbottom
-}
+
+\ifonlyphonetics{%
+  \RequirePackage[margin=1in]{geometry}
+\else
+\settypeblocksize{7.75in}{32pc}{*}
+\setlrmarginsandblock{3.5cm}{2.5cm}{*}
+\setulmarginsandblock{2.5cm}{*}{1}
+\checkandfixthelayout
+\fi
 
 \RequirePackage{cabin}
 
@@ -361,41 +351,40 @@
 \RequirePackage{changepage}
 \RequirePackage{lastpage}
 \let\footruleskip\undefined % https://tex.stackexchange.com/a/37880
+\RequirePackage[explicit]{titlesec}
 \RequirePackage{fancyhdr}
 \pagestyle{fancyplain}
 \renewcommand{\headrulewidth}{0mm}%
 \fancyhf{} % Clear header
+
+\ifonlyphonetics
+\rfoot{\thepage}
+\else
 \rfoot{\itshape Page {\thepage} of \pageref{LastPage}} % 'Page X of Y' footer
-
-\RequirePackage[calc,en-US]{datetime2}
-\DTMlangsetup[en-US]{showdayofmonth=true}
-\AtBeginDocument{\let\today\DTMtoday}
-\def\duedate{\today}
-\unless\ifx\LING@duedate\relax
-\renewcommand{\duedate}{\DTMDate{\LING@duedate}}
 \fi
-
+\RequirePackage[calc,en-US, showdow]{datetime2}
+\DTMlangsetup[en-US]{showdayofmonth=true}
 \newcommand{\definestyle}[1]{
  \lowercase{\def\tmpA{#1}}%
  \newboolean{\tmpA}
  \newif\ifsplit
- \IfSubStr{\LING@profname}{}{\splittrue}{\splitfalse}
+ \IfSubStr{\LING@profname}{ }{\splittrue}{\splitfalse}
  \ifsplit
  \StrBehind{\LING@profname}{ }[\csB]%
  \else
  \let\csB\LING@profname
  \fi
- \StrGobbleLeft{\csB}{1}[\tmpB]%
+ \StrGobbleLeft{\csB}{1}[\tmpB]
  \IfEndWith{#1}{\tmpB}{\setboolean{\tmpA}{true}}{\setboolean{\tmpA}{false}}
 }
 \definestyle{poole}
 \definestyle{bumford}
-\newcommand{\lingtitle}[0]{}
 \ifthenelse{\equal{\LING@style}{bumford}}{\bumfordtrue}{}
+\newcommand{\lingtitle}[0]{}
 \ifbumford % use bumford style
 \let\bumfordtitle\lingtitle
 \unless\ifx\LING@coursenumber\@empty
-\g@addto@macro\bumfordtitle{\textbf{\scshape {\LING@coursenumber}}: \@title\newline}
+\g@addto@macro\bumfordtitle{\textbf{\scshape {\MakeLowercase{\LING@coursenumber}}}: \@title\newline}
 \fi
 \unless\ifx\LING@profname\@empty
 \g@addto@macro\bumfordtitle{\LING@profname\newline}
@@ -407,8 +396,6 @@
   \begin{flushright}\@author\\\@date\\\end{flushright}\medskip
 }
 \else\ifpoole % use poole style
-\RequirePackage[bottom,hang,multiple,norule]{footmisc}
-\renewcommand{\footnotemargin}[0]{1.25em}
 \RequirePackage[p]{libertine}
 % See  Manual for Linux Libertine with XeTeX
 % http://linuxlibertine.sourceforge.net/Libertine-XeTex-EN.pdf
@@ -462,15 +449,31 @@
     \unless\ifx\LING@coursename\@empty
     \g@addto@macro\pooletitle{ : \LING@coursename\\}
     \fi
-    \g@addto@macro\pooletitle{\duedate}
+    \g@addto@macro\pooletitle{\@date}
   }
 }
 \renewcommand{\lingtitle}{%
   \bgroup\setlength{\parindent}{0pt}%
   {\LARGE \bfseries\@title}\hfill\@author \\
   \smallskip\noindent\titlehrule[0.4mm]
-  \begin{flushright} \pooletitle \end{flushright}
+  \begin{flushright} \pooletitle \end{flushright}\egroup
 }
 \fi\fi
+\ifonlyphonetics
+  \titleformat{\section}{\scshape}{\thesection}{0.6em}{#1:}
+  \titlespacing{\section}{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
+  \renewcommand{\lingtitle}{%
+    \bgroup\setlength{\parindent}{0pt}%
+    Name \underline{\hspace{4mm}\@author\hspace{2cm}}\hfill
+    {\begin{flushright}
+      \LING@coursename, \LING@quarter \\
+      \LING@profname
+    \end{flushright}}
+    \begin{center}
+      {\Large \MakeUppercase \@title} \\\medskip
+      {\textbf{This homework is due in class on \DTMDate{\@date}}}
+    \end{center}\egroup
+  }
+\fi
 \let\maketitle\lingtitle
 \endinput %%% uclaling.cls ends here.
