@@ -13,6 +13,8 @@
 \RequirePackage{etoolbox}
 \RequirePackage{xpatch}
 \RequirePackage{xstring}
+\RequirePackage{xargs}
+\RequirePackage{xifthen}
 \RequirePackage[patch,debugshow]{kvoptions}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Package Options
@@ -52,6 +54,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Figures, Markup, Lists, and Tables
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \RequirePackage{graphicx}
 \RequirePackage[usenames,dvipsnames,x11names,table]{xcolor}
 \RequirePackage{iitem} % Multiple level lists
@@ -77,7 +80,7 @@
 \ifxetex
 \RequirePackage[fleqn,tbtags]{mathtools}
 \RequirePackage{fontspec} % Open type fonts
-\RequirePackage[math-style=upright]{unicode-math} % Support unicode input
+\RequirePackage[math-style=literal]{unicode-math} % Support unicode input
 \setmainfont{STIX Two Text} % Default Font
 \setmathfont{STIX Two Math}[StylisticSet=02,StylisticSet=08] % Math font
 \RequirePackage{fixmath}
@@ -104,7 +107,30 @@
 \RequirePackage{bussproofs} % derivational proofs
 \AtBeginEnvironment{prooftree}{\def\extraVskip{8pt}}
 \alwaysRootAtTop
+\newcommand{\ife}[4]{\ifthenelse{\equal{#1}{#2}}{#3}{#4}}
+\newenvironment{tree}{\begin{prooftree}}{\end{prooftree}}
+\newcommand{\ax}[1]{\AxiomC{\EMX{#1}}}
+\renewcommandx{\inf}[2][1=1, usedefault]{
+\ife{#1}{1}
+  {\UnaryInfC{\EMX{#2}}}
+  {\ife{#1}{2}
+    {\BinaryInfC{\EMX{#2}}}
+    {\ife{#1}{3}
+      {\TrinaryInfC{\EMX{#2}}}
+      {\ife{#1}{4}
+        {\QuaternaryInfC{\EMX{#2}}}
+        {\ife{#1}{5}
+          {\QuinaryInfC{\EMX{#2}}}{}
+        }
+      }
+    }
+  }
+}
+\newcommand{\LL}[1]{\LeftLabel{#1}}
+\newcommand{\RL}[1]{\RightLabel{#1}}
+\newcommand{\binf}[1]{\inf[2]{#1}}
 \newcommand{\Rule}[1]{\RightLabel{$\mathbf{#1}$}}
+% Scaled prooftree
 \newenvironment{sprooftree}[1]% https://tex.stackexchange.com/a/105748
   {\gdef\scalefactor{#1}\begin{center}\proofSkipAmount \leavevmode}%
   {\scalebox{\scalefactor}{\DisplayProof}\proofSkipAmount \end{center} }
@@ -114,6 +140,7 @@
 \AtBeginEnvironment{minted}{% Remove red boxing around syntax errors
   \renewcommand{\fcolorbox}[4][]{#4}
 }
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Theorems, Bibliography, and Appendixes
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -169,11 +196,12 @@
 \AtEndPreamble{
   \hypersetup{
     colorlinks=true,linkcolor=black,
-    filecolor=black,citecolor=black,
-    urlcolor=lingurlcolor
+    filecolor=black,citecolor=black
+    urlcolor=MidnightBlue
   }
   \RequirePackage{url}
-  \urlstyle{sf}
+  \renewcommand\UrlFont{\color{red}\rmfamily\itshape}
+  \urlstyle{rm}
   \let\UrlSpecialsOld\UrlSpecials
   \def\UrlSpecials{\UrlSpecialsOld\do\/{\Url@slash}\do\_{\Url@underscore}}%
   \def\Url@slash{\@ifnextchar/{\kern-.11em\mathchar47\kern-.2em}%
@@ -281,6 +309,8 @@
 \newcommand{\denotation}[1]{\denotationbase{\text{#1}}}
 \newcommand{\denotationbase}[1]{\ensuremath{\left\lsem#1\right\rsem}}
 \newcommand{\startfn}[0]{\ensuremath{\ .\ }}
+\newcommand{\Langle}[0]{\Big\langle}
+\newcommand{\Rangle}[0]{\Big\rangle}
 \newcommand{\sem}[2][M\!,g]{\mbox{ $[\![ #2 ]\!]^{#1}$}}
 \newcommand{\vb}[0]{\text{\,|\, }}
 \newcommand{\arc}[2]{\overarc{$#1$$#2$}}
@@ -339,14 +369,11 @@
 \renewcommand{\thesection}{\arabic{section}}
 
 
-\ifonlyphonetics{%
-  \RequirePackage[margin=1in]{geometry}
-\else
-\settypeblocksize{7.75in}{32pc}{*}
-\setlrmarginsandblock{3.5cm}{2.5cm}{*}
-\setulmarginsandblock{2.5cm}{*}{1}
-\checkandfixthelayout
-\fi
+\RequirePackage[margin=1in]{geometry}
+% \settypeblocksize{7.75in}{32pc}{*}
+% \setlrmarginsandblock{3.5cm}{2.5cm}{*}
+% \setulmarginsandblock{2.5cm}{*}{1}
+
 
 \RequirePackage{cabin}
 
