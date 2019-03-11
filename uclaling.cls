@@ -186,8 +186,8 @@
 
 %% Bibliography
 \RequirePackage[longnamesfirst]{natbib}
-\setcitestyle{authoryear,round,semicolon,aysep={}, yysep={,}, notesep={:}}
 \RequirePackage[version=3]{mhchem}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Counters, Cross References, and Hyperlinks
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -196,11 +196,11 @@
 \AtEndPreamble{
   \hypersetup{
     colorlinks=true,linkcolor=black,
-    filecolor=black,citecolor=black
-    urlcolor=MidnightBlue
+    filecolor=black,citecolor=black,
+    urlcolor=lingurlcolor
   }
   \RequirePackage{url}
-  \renewcommand\UrlFont{\color{red}\rmfamily\itshape}
+  \renewcommand\UrlFont{\rmfamily\itshape}
   \urlstyle{rm}
   \let\UrlSpecialsOld\UrlSpecials
   \def\UrlSpecials{\UrlSpecialsOld\do\/{\Url@slash}\do\_{\Url@underscore}}%
@@ -312,7 +312,8 @@
 \newcommand{\Langle}[0]{\Big\langle}
 \newcommand{\Rangle}[0]{\Big\rangle}
 \newcommand{\sem}[2][M\!,g]{\mbox{ $[\![ #2 ]\!]^{#1}$}}
-\newcommand{\vb}[0]{\text{\,|\, }}
+\newcommand{\cat}[1]{\ensuremath{\mathop{\mathslash{}}\limits_{#1}}}
+\newcommand{\vb}[0]{\text{\,|\,}}
 \newcommand{\arc}[2]{\overarc{$#1$$#2$}}
 \fi
 \ifsyntax % Syntax Packages
