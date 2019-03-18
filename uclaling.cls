@@ -9,7 +9,7 @@
 \RequirePackage{ifthen}
 \RequirePackage{ifpdf}
 \RequirePackage{ifxetex}
-\RequirePackage{calc}
+\RequirePackage{efbox,calc}
 \RequirePackage{etoolbox}
 \RequirePackage{xpatch}
 \RequirePackage{xstring}
@@ -33,6 +33,7 @@
 \DeclareStringOption{coursename} % e.g 'Semantics II'
 \DeclareStringOption{coursenumber} % e.g 'LING 165c'
 \DeclareStringOption{assignmentnumber} % e.g 'Squib 3'
+\DeclareStringOption{assignment}
 \DeclareStringOption{profname} % professor name
 \DeclareStringOption{profemail} % professor email
 \DeclareStringOption{quarter}
@@ -47,7 +48,7 @@
     \@unknownoptionerror
   \fi
 }
-\PassOptionsToClass{article,oneside,oldfontcommands,a4paper,11pt}{memoir}
+\PassOptionsToClass{article,oneside,oldfontcommands,a4paper,10pt}{memoir}
 \ProcessKeyvalOptions* % Process Options
 \LoadClass{memoir} % Load Class
 \let\LING@duedate\relax
@@ -191,7 +192,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Counters, Cross References, and Hyperlinks
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\RequirePackage{hyperref}
+\RequirePackage[unicode]{hyperref}
 \colorlet{lingurlcolor}{MidnightBlue}
 \AtEndPreamble{
   \hypersetup{
@@ -312,7 +313,7 @@
 \newcommand{\Langle}[0]{\Big\langle}
 \newcommand{\Rangle}[0]{\Big\rangle}
 \newcommand{\sem}[2][M\!,g]{\mbox{ $[\![ #2 ]\!]^{#1}$}}
-\newcommand{\cat}[1]{\ensuremath{\mathop{\mathslash{}}\limits_{#1}}}
+\newcommand{\cat}[1]{\ensuremath{\mathop{\mathslash{}}\limits_{\tiny #1}}}
 \newcommand{\vb}[0]{\text{\,|\,}}
 \newcommand{\arc}[2]{\overarc{$#1$$#2$}}
 \fi
@@ -418,17 +419,40 @@
 \newcommand{\lingtitle}[0]{}
 \ifbumford % use bumford style
 \let\bumfordtitle\lingtitle
-\unless\ifx\LING@coursenumber\@empty
-\g@addto@macro\bumfordtitle{\textbf{\scshape {\MakeLowercase{\LING@coursenumber}}}: \@title\newline}
-\fi
-\unless\ifx\LING@profname\@empty
-\g@addto@macro\bumfordtitle{\LING@profname\newline}
-\fi
-\renewcommand{\lingtitle}{
-  \bgroup\setlength{\parindent}{0pt}%
-  \bumfordtitle{}\\
-  \smallskip\noindent\titlehrule[0.4mm]
-  \begin{flushright}\@author\\\@date\\\end{flushright}\medskip
+\ifthenelse{\equal{squib}{\LING@type}}{ % bumford squib
+  \unless\ifx\LING@coursenumber\@empty
+  \g@addto@macro\bumfordtitle{\textbf{\scshape {\MakeLowercase{\LING@coursenumber}}}:}
+  \fi
+  \unless\ifx\LING@coursename\@empty
+  \g@addto@macro\bumfordtitle{\LING@coursename}
+  \fi
+  \def\assignment{}
+  \unless\ifx\LING@assignment\@empty
+  \let\assignment\LING@assignment
+  \fi
+  \renewcommand{\lingtitle}{%
+    \bgroup\setlength{\parindent}{0pt}%
+    {\Large \@title}\vskip{2em}
+    \begin{tabularx}{\textwidth}{X r}
+      \@author & \bumfordtitle{} \\
+      \unless\ifx\emailaddr\@empty {\small \emaillink} \fi & \assignment \\
+      & \ifx\LING@profname \\ \else \profname\\
+    \end{tabularx}
+  } % end for bumford squib
+}{%
+  \unless\ifx\LING@coursenumber\@empty
+  \g@addto@macro\bumfordtitle{\textbf{\scshape
+      {\MakeLowercase{\LING@coursenumber}}}: \@title\newline}
+  \fi
+  \unless\ifx\LING@profname\@empty
+  \g@addto@macro\bumfordtitle{\LING@profname\newline}
+  \fi
+  \renewcommand{\lingtitle}{
+    \bgroup\setlength{\parindent}{0pt}%
+    \bumfordtitle{}\\
+    \smallskip\noindent\titlehrule[0.4mm]
+    \begin{flushright}\@author\\\@date\\\end{flushright}\medskip
+  }
 }
 \else\ifpoole % use poole style
 \PassOptionsToPackage{norule}{footmisc}
@@ -457,7 +481,7 @@
 \RequirePackage{microtype}
 \fi
 \let\pooletitle\lingtitle
-\ifthenelse{\equal{squib}{\LING@type}}{% squib
+\ifthenelse{\equal{squib}{\LING@type}}{% poole squib
   \unless\ifx\LING@assignmentnumber\@empty
   \g@addto@macro\pooletitle{Squib \LING@assignmentnumber\newline}
   \fi
@@ -493,9 +517,9 @@
   {\LARGE \bfseries\@title}\hfill\@author \\
   \smallskip\noindent\titlehrule[0.4mm]
   \begin{flushright} \pooletitle \end{flushright}\egroup
-}
-\fi\fi
-\ifonlyphonetics
+} % end poole style
+\fi
+\else\ifonlyphonetics % phonetics option
   \titleformat{\section}{\scshape}{\thesection}{0.6em}{#1:}
   \titlespacing{\section}{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
   \renewcommand{\lingtitle}{%
@@ -510,7 +534,14 @@
       {\textbf{This homework is due in class on \DTMDate{\@date}}}
     \end{center}\egroup
   }
-\fi
+  \else
+  \renewcommand{\lingtitle}{
+    \bgroup\setlength{\parindent}{0pt}%
+    \bumfordtitle{}\\
+    \smallskip\noindent\titlehrule[0.4mm]
+    \begin{flushright}\@author\\\@date\\\end{flushright}\medskip
+  }
+\fi\fi
 \RequirePackage{footmisc}
 \renewcommand{\footnotemargin}[0]{1.25em}
 \let\maketitle\lingtitle
