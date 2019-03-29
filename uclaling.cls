@@ -61,6 +61,7 @@
 \RequirePackage{iitem} % Multiple level lists
 \RequirePackage{paralist} % enumerated items in paragraphs
 \RequirePackage{ulem}
+\RequirePackage{changepage}
 \RequirePackage{float} % Float environments
 \RequirePackage{wrapfig} % Wrap text around float
 \RequirePackage{rotating} % Rotate environment
@@ -74,6 +75,7 @@
 \RequirePackage{dcolumn} % Dynamic columns
 \RequirePackage{rccol} % Right cented table column 'R' option
 \RequirePackage{multicol} % Multiple columns
+\RequirePackage{adjmulticol} % adjust multiple columns
 \RequirePackage{multirow} % Multiple rows
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Fonts, Symbols, and Maths
@@ -135,7 +137,6 @@
 \newenvironment{sprooftree}[1]% https://tex.stackexchange.com/a/105748
   {\gdef\scalefactor{#1}\begin{center}\proofSkipAmount \leavevmode}%
   {\scalebox{\scalefactor}{\DisplayProof}\proofSkipAmount \end{center} }
-
 
 \RequirePackage{minted} % Syntax highlighting
 \AtBeginEnvironment{minted}{% Remove red boxing around syntax errors
@@ -383,7 +384,16 @@
   \leavevmode\leaders\hrule height#1\hfill\kern0pt
 }
 
-\RequirePackage{changepage}
+\newlength{\offsetpage}
+\setlength{\offsetpage}{1.0cm}
+\newenvironment{widepage}{\begin{adjustwidth}{-\offsetpage}{-\offsetpage}%
+    \addtolength{\textwidth}{2\offsetpage}}%
+{\end{adjustwidth}}
+
+\newenvironment{widecols}[1]% https://tex.stackexchange.com/a/105748
+  {\begin{multicols}{#1}\begin{widepage}}%
+  {\end{widepage}\end{multicols}}
+
 \RequirePackage{lastpage}
 \let\footruleskip\undefined % https://tex.stackexchange.com/a/37880
 \RequirePackage[explicit]{titlesec}
@@ -415,8 +425,8 @@
 }
 \definestyle{poole}
 \definestyle{bumford}
-\ifthenelse{\equal{\LING@style}{bumford}}{\bumfordtrue}{}
 \newcommand{\lingtitle}[0]{}
+\ifthenelse{\equal{\LING@style}{bumford}}{\bumfordtrue}{}
 \ifbumford % use bumford style
 \let\bumfordtitle\lingtitle
 \ifthenelse{\equal{squib}{\LING@type}}{ % bumford squib
