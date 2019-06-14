@@ -135,8 +135,8 @@
 \newcommand{\Rule}[1]{\RightLabel{$\mathbf{#1}$}}
 % Scaled prooftree
 \newenvironment{sprooftree}[1]% https://tex.stackexchange.com/a/105748
-  {\gdef\scalefactor{#1}\begin{center}\proofSkipAmount \leavevmode}%
-  {\scalebox{\scalefactor}{\DisplayProof}\proofSkipAmount \end{center} }
+{\gdef\scalefactor{#1}\begin{center}\proofSkipAmount\leavevmode}%
+  {\scalebox{\scalefactor}{\DisplayProof}\proofSkipAmount\end{center} }
 
 \RequirePackage{minted} % Syntax highlighting
 \AtBeginEnvironment{minted}{% Remove red boxing around syntax errors
@@ -426,7 +426,7 @@
 \definestyle{poole}
 \definestyle{bumford}
 \newcommand{\lingtitle}[0]{}
-\ifthenelse{\equal{\LING@style}{bumford}}{\bumfordtrue}{}
+
 \ifbumford % use bumford style
 \let\bumfordtitle\lingtitle
 \ifthenelse{\equal{squib}{\LING@type}}{ % bumford squib
