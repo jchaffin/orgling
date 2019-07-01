@@ -106,7 +106,7 @@
  {\@gobbletwo}
  {\@gobblethree}
  {}{}
-\RequirePackage{stmaryrd} % growing delimiters and additiona math symbols
+\RequirePackage{stmaryrd} % growing delimiters and additional math symbols
 \RequirePackage{bussproofs} % derivational proofs
 \AtBeginEnvironment{prooftree}{\def\extraVskip{8pt}}
 \alwaysRootAtTop
