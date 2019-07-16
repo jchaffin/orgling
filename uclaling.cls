@@ -34,11 +34,10 @@
 \DeclareStringOption{coursenumber} % e.g 'LING 165c'
 \DeclareStringOption{assignmentnumber} % e.g 'Squib 3'
 \DeclareStringOption{assignment}
-\DeclareStringOption{profname} % professor name
+\DeclareStringOption[none]{profname} % professor name
 \DeclareStringOption{profemail} % professor email
 \DeclareStringOption{quarter}
 \DeclareStringOption[all]{subject} % One of 'all', 'phonetic', 'semantics', 'syntax
-\DeclareStringOption[none]{style} % current options 'bumford', 'poole', or 'none'
 \DeclareDefaultOption{%
   \ifx\CurrentOptionValue\relax
   % Expand \CurrentOption
@@ -52,6 +51,7 @@
 \ProcessKeyvalOptions* % Process Options
 \LoadClass{memoir} % Load Class
 \let\LING@duedate\relax
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Figures, Markup, Lists, and Tables
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -137,7 +137,10 @@
 \newenvironment{sprooftree}[1]% https://tex.stackexchange.com/a/105748
 {\gdef\scalefactor{#1}\begin{center}\proofSkipAmount\leavevmode}%
   {\scalebox{\scalefactor}{\DisplayProof}\proofSkipAmount\end{center} }
-
+\newcommand{\HSPC}[1]{\insertBetweenHyps{\hskip#1}}
+\newcommand{\LSPC}[1]{\def\LabelSpacing{#1}}
+\newcommand{\VSKP}[1]{\def\extraVskip{#1}}
+\newcommand{\SOH}[1]{\def\ScoreOverhang{#1}}
 \RequirePackage{minted} % Syntax highlighting
 \AtBeginEnvironment{minted}{% Remove red boxing around syntax errors
   \renewcommand{\fcolorbox}[4][]{#4}
@@ -289,16 +292,28 @@
     }
   }
 } % end forestset
+
 \newif\ifsemantics
 \newif\ifsyntax
 \newif\ifphonetics
 \newif\ifonlyphonetics
-\ifthenelse{\equal{\LING@subject}{all}}{\semanticstrue\syntaxtrue\phoneticstrue}{%
+\newif\ifsquib
+\newif\ifhomework
+\newif\ifnotes
+
+\ifthenelse{\equal{\LING@type}{squib}}{\squibtrue}{\squibfalse}
+\ifthenelse{\equal{\LING@type}{homework}}{\homeworktrue}{\homeworkfalse}
+\ifthenelse{\equal{\LING@type}{notes}}{\notestrue}{\notesfalse}
+
+\ifthenelse{\equal{\LING@subject}{all}}{%
+  \semanticstrue\syntaxtrue\phoneticstrue
+}{%
   \ifthenelse{\equal{\LING@subject}{semantics}}{\semanticstrue}{\semanticsfalse}
   \ifthenelse{\equal{\LING@subject}{syntax}}{\syntaxtrue}{\syntaxfalse}
-  \ifthenelse{\equal{\LING@subject}{phonetics}}{\phoneticstrue
-    \onlyphoneticstrue}{\phoneticsfalse \onlyphoneticsfalse}
+  \ifthenelse{\equal{\LING@subject}{phonetics}}{\phoneticstrue \onlyphoneticstrue}{\phoneticsfalse \onlyphoneticsfalse}
 }
+
+
 
 \ifphonetics % Phonetics packages
 \RequirePackage{phonetic} % Phonetics macros
@@ -371,7 +386,6 @@
 
 \renewcommand{\thesection}{\arabic{section}}
 
-
 \RequirePackage[margin=1in]{geometry}
 % \settypeblocksize{7.75in}{32pc}{*}
 % \setlrmarginsandblock{3.5cm}{2.5cm}{*}
@@ -402,14 +416,14 @@
 \renewcommand{\headrulewidth}{0mm}%
 \fancyhf{} % Clear header
 
-\ifonlyphonetics
-\rfoot{\thepage}
-\else
-\rfoot{\itshape Page {\thepage} of \pageref{LastPage}} % 'Page X of Y' footer
-\fi
 \PassOptionsToPackage{bottom,hang,multiple}{footmisc}
 \RequirePackage[calc,en-US, showdow]{datetime2}
 \DTMlangsetup[en-US]{showdayofmonth=true}
+
+\newcommand*{\email}[1]{\def\emailaddr{#1}}
+\newcommand{\emaillink}[0]{\href{mailto:\emailaddr}{\emailaddr}}
+\email{jchaffin@ucla.edu}
+
 \newcommand{\definestyle}[1]{
  \lowercase{\def\tmpA{#1}}%
  \newboolean{\tmpA}
@@ -423,48 +437,49 @@
  \StrGobbleLeft{\csB}{1}[\tmpB]
  \IfEndWith{#1}{\tmpB}{\setboolean{\tmpA}{true}}{\setboolean{\tmpA}{false}}
 }
+
+
+
+\newcommand\lingtitle[0]{\bgroup\setlength{\parindent}{0pt}\@title\egroup\\[12pt]}
+
 \definestyle{poole}
 \definestyle{bumford}
-\newcommand{\lingtitle}[0]{}
-
-\ifbumford % use bumford style
-\let\bumfordtitle\lingtitle
-\ifthenelse{\equal{squib}{\LING@type}}{ % bumford squib
-  \unless\ifx\LING@coursenumber\@empty
-  \g@addto@macro\bumfordtitle{\textbf{\scshape {\MakeLowercase{\LING@coursenumber}}}:}
-  \fi
-  \unless\ifx\LING@coursename\@empty
-  \g@addto@macro\bumfordtitle{\LING@coursename}
-  \fi
-  \def\assignment{}
-  \unless\ifx\LING@assignment\@empty
-  \let\assignment\LING@assignment
-  \fi
-  \renewcommand{\lingtitle}{%
-    \bgroup\setlength{\parindent}{0pt}%
-    {\Large \@title}\vskip{2em}
-    \begin{tabularx}{\textwidth}{X r}
-      \@author & \bumfordtitle{} \\
-      \unless\ifx\emailaddr\@empty {\small \emaillink} \fi & \assignment \\
-      & \ifx\LING@profname \\ \else \profname\\
-    \end{tabularx}
-  } % end for bumford squib
-}{%
-  \unless\ifx\LING@coursenumber\@empty
-  \g@addto@macro\bumfordtitle{\textbf{\scshape
-      {\MakeLowercase{\LING@coursenumber}}}: \@title\newline}
-  \fi
-  \unless\ifx\LING@profname\@empty
-  \g@addto@macro\bumfordtitle{\LING@profname\newline}
-  \fi
-  \renewcommand{\lingtitle}{
-    \bgroup\setlength{\parindent}{0pt}%
-    \bumfordtitle{}\\
-    \smallskip\noindent\titlehrule[0.4mm]
-    \begin{flushright}\@author\\\@date\\\end{flushright}\medskip
-  }
+\ifbumford
+\def\bumfordtitle{}
+\ifsquib
+\unless\ifx\LING@coursenumber\@empty
+\g@addto@macro\bumfordtitle{\textbf{\scshape {\MakeLowercase{\LING@coursenumber}}}}
+\fi
+\unless\ifx\LING@coursename\@empty
+\g@addto@macro\bumfordtitle{\LING@coursename}
+\fi
+\def\assignment{}
+\unless\ifx\LING@assignment\@empty
+\let\assignment\LING@assignment
+\fi
+\renewcommand{\lingtitle}{%
+  \bgroup\setlength{\parindent}{0pt}%
+  {\Large \@title}\vskip{2em}
+  \begin{tabularx}{\textwidth}{X r}
+    \@author & \bumfordtitle{} \\
+    \ifx\emailaddr\@empty \else {\small \emaillink} \fi & \assignment
+    \ifx\LING@profname\@empty \else \\ & \profname\fi
+  \end{tabularx}
+\else
+\unless\ifx\LING@coursenumber\@empty
+\g@addto@macro\bumfordtitle{\textbf{\scshape {\MakeLowercase{\LING@coursenumber}}} :
+  \@title}
+\else \g@addto@macro\bumfordtitle{\@title} \fi
+\ifx\LING@profname\@empty \else \g@addto@macro\bumfordtitle{\\ \LING@profname} \fi
+\renewcommand{\lingtitle}{
+  \bgroup\setlength{\parindent}{0pt}%
+  \bumfordtitle{}\\
+  \smallskip\noindent\titlehrule[0.4mm]
+  \begin{flushright}\@author\\\@date\\\end{flushright}\medskip
 }
-\else\ifpoole % use poole style
+\fi
+\fi
+\ifpoole
 \PassOptionsToPackage{norule}{footmisc}
 \RequirePackage[p]{libertine}
 % See  Manual for Linux Libertine with XeTeX
@@ -490,69 +505,50 @@
 \RequirePackage[libertine]{newxtmath}
 \RequirePackage{microtype}
 \fi
-\let\pooletitle\lingtitle
-\ifthenelse{\equal{squib}{\LING@type}}{% poole squib
-  \unless\ifx\LING@assignmentnumber\@empty
-  \g@addto@macro\pooletitle{Squib \LING@assignmentnumber\newline}
-  \fi
-  \unless\ifx\LING@coursenumber\@empty
-  \g@addto@macro\pooletitle{\textsc{\LING@coursenumber}}
-  \fi
-  \unless\ifx\LING@coursename\@empty
-  \g@addto@macro\pooletitle{ : \LING@coursename\\}
-  \fi
-}{\ifthenelse{\equal{homework}{\LING@type}}{% homework
-    \unless\ifx\LING@profname\@empty
-    \g@addto@macro\pooletitle{\LING@profname\newline}}
-    \fi
-    \unless\ifx\LING@coursename\@empty
-    \g@addto@macro\pooletitle{\LING@coursename\\}
-    \fi
-    \g@addto@macro\pooletitle{\textbf{Due: \duedate}}
-  }{% generic
-    \unless\ifx\LING@profname\@empty
-    \g@addto@macro\pooletitle{\LING@profname\\}
-    \fi
-    \unless\ifx\LING@coursenumber\@empty
-    \g@addto@macro\pooletitle{\textsc{\LING@coursenumber}}
-    \fi
-    \unless\ifx\LING@coursename\@empty
-    \g@addto@macro\pooletitle{ : \LING@coursename\\}
-    \fi
-    \g@addto@macro\pooletitle{\@date}
-  }
-}
+\def\pooletitle{}
+\ifsquib
+\ifx\LING@assignmentnumber\@empty \else \g@addto@macro\pooletitle{Squib
+  \LING@assignmentnumber} \fi
+\ifx\LING@coursenumber\@empty \else \\
+\g@addto@macro\pooletitle{\textsc{\LING@coursenumber}} \fi
+\if\LING@coursename\@empty \else \g@addto@macro\pooletitle{ : \LING@coursename} \fi
+\else\ifhomework
+\ifx\LING@profname\@empty \else \g@addto@macro\pooletitle{\\ \LING@profname} \fi
+\ifx\LING@coursename\@empty \else \g@addto@macro\pooletitle{\\ \LING@coursename}
+\fi
+\g@addto@macro\pooletitle{\\ \textbf{Due: \duedate}}
+\else
+\ifx\LING@profname\@empty \else \g@addto@macro\pooletitle{\LING@profname} \fi
+\ifx\LING@coursenumber\@empty \else \g@addto@macro\pooletitle{\textsc{\LING@coursenumber}} \fi
+\ifx\LING@coursename\@empty \else \g@addto@macro\pooletitle{ : \LING@coursename}
+\fi
+\g@addto@macro\pooletitle{\\ \@date}
+\fi % end ifsquib
+\fi % end ifhomework
 \renewcommand{\lingtitle}{%
   \bgroup\setlength{\parindent}{0pt}%
   {\LARGE \bfseries\@title}\hfill\@author \\
   \smallskip\noindent\titlehrule[0.4mm]
   \begin{flushright} \pooletitle \end{flushright}\egroup
-} % end poole style
+}
 \fi
-\else\ifonlyphonetics % phonetics option
-  \titleformat{\section}{\scshape}{\thesection}{0.6em}{#1:}
-  \titlespacing{\section}{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
-  \renewcommand{\lingtitle}{%
-    \bgroup\setlength{\parindent}{0pt}%
-    Name \underline{\hspace{4mm}\@author\hspace{2cm}}\hfill
-    {\begin{flushright}
-      \LING@coursename, \LING@quarter \\
-      \LING@profname
-    \end{flushright}}
-    \begin{center}
-      {\Large \MakeUppercase \@title} \\\medskip
-      {\textbf{This homework is due in class on \DTMDate{\@date}}}
-    \end{center}\egroup
-  }
-  \else
-  \renewcommand{\lingtitle}{
-    \bgroup\setlength{\parindent}{0pt}%
-    \bumfordtitle{}\\
-    \smallskip\noindent\titlehrule[0.4mm]
-    \begin{flushright}\@author\\\@date\\\end{flushright}\medskip
-  }
-\fi\fi
-\RequirePackage{footmisc}
-\renewcommand{\footnotemargin}[0]{1.25em}
+
+\ifonlyphonetics
+\titleformat{\section}{\scshape}{\thesection}{0.6em}{#1:}
+\titlespacing{\section}{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
+\renewcommand{\lingtitle}{%
+  \bgroup\setlength{\parindent}{0pt}%
+  Name \underline{\hspace{4mm}\@author\hspace{2cm}}\hfill
+  {\begin{flushright}
+    \LING@coursename, \LING@quarter \\
+    \LING@profname
+  \end{flushright}}
+  \begin{center}
+    {\Large \MakeUppercase \@title} \\\medskip
+    {\textbf{This homework is due in class on \DTMDate{\@date}}}
+  \end{center}\egroup
+}
+\fi
+
 \let\maketitle\lingtitle
 \endinput %%% uclaling.cls ends here.
