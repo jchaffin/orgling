@@ -111,7 +111,6 @@
 \AtBeginEnvironment{prooftree}{\def\extraVskip{8pt}}
 \alwaysRootAtTop
 \newcommand{\ife}[4]{\ifthenelse{\equal{#1}{#2}}{#3}{#4}}
-\newenvironment{tree}{\begin{prooftree}}{\end{prooftree}}
 \newcommand{\ax}[1]{\AxiomC{\EMX{#1}}}
 \renewcommandx{\inf}[2][1=1, usedefault]{
 \ife{#1}{1}
