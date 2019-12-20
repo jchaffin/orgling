@@ -373,7 +373,6 @@
 \newcommand{\vP}[0]{\textit{v}P\xspace}
 \newcommand{\littlev}[0]{\textit{v}\xspace}
 \newcommand{\head}[1]{#1$^0$}
-\newcommand{\spec}[1]{\mbox{[Spec, #1]}}
 \newcommand{\comp}[1]{\mbox{[Comp, #1]}}
 \newcommand{\xbar}[1]{$\overline{\textrm{#1}}$}
 \newcommand{\Agree}[0]{\textsc{Agree}\xspace}
