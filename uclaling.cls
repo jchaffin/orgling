@@ -89,6 +89,7 @@
 \setmainfont{STIX Two Text} % Default Font
 \setmathfont{STIX Two Math}[StylisticSet=02,StylisticSet=08] % Math font
 \RequirePackage{fixmath}
+\AtBeginDocument{\renewcommand{\epsilon}{\ensuremath{𝜖}}}
 % \SetMathAlphabet{\mathit}{normal}{OML}{\rmdefault}{m}{n}
 %running fraction with slash - requires math mode.
 \setmonofont[Scale=MatchUppercase]{DejaVu Sans Mono} % Monospace Font
@@ -566,7 +567,7 @@ sep=4pt, yshift =-3pt, font=\small\itshape, text height=.7em]
 
 \RequirePackage{cabin}
 \RequirePackage{fancyvrb}
-\DefineVerbatimEnvironment{verbatim}{Verbatim}{fontsize=\small,frame=single, resetmargins=true}
+\DefineVerbatimEnvironment{verbatim}{Verbatim}{fontsize=\small,frame=single}
 
 \newcommand*\titlehrule[1][0.4pt]{%
   \leavevmode\leaders\hrule height#1\hfill\kern0pt
