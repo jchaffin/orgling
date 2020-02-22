@@ -84,6 +84,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \ifxetex
 \RequirePackage[fleqn,tbtags]{mathtools}
+\REquirePackage{stackengine}
 \RequirePackage{fontspec} % Open type fonts
 \RequirePackage[math-style=literal]{unicode-math} % Support unicode input
 \setmainfont{STIX Two Text} % Default Font
