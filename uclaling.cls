@@ -25,6 +25,7 @@
 \newcommand*{\SetupType}{%
   \expandafter\@SetupType\expandafter{\CurrentOption}%
 }
+\DeclareVoidOption{midterm}{\SetupType}
 \DeclareVoidOption{generic}{\SetupType}
 \DeclareVoidOption{squib}{\SetupType}
 \DeclareVoidOption{homework}{\SetupType}
@@ -32,11 +33,14 @@
 \newcommand*{\@SetupType}[1]{\setkeys{LING}{type={#1}}}
 \DeclareStringOption{coursename} % e.g 'Semantics II'
 \DeclareStringOption{coursenumber} % e.g 'LING 165c'
+\DeclareStringOption{disnum} % e.g '1B'
+\DeclareStringOption{courseterm}
 \DeclareStringOption{assignmentnumber} % e.g 'Squib 3'
 \DeclareStringOption{assignment}
 \DeclareStringOption[none]{profname} % professor name
 \DeclareStringOption{profemail} % professor email
 \DeclareStringOption{quarter}
+\DeclareBoolOption{midterm}
 \DeclareStringOption[all]{subject} % One of 'all', 'phonetic', 'semantics', 'syntax
 \DeclareDefaultOption{%
   \ifx\CurrentOptionValue\relax
@@ -84,7 +88,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \ifxetex
 \RequirePackage[fleqn,tbtags]{mathtools}
-\REquirePackage{stackengine}
+\RequirePackage{stackengine}
 \RequirePackage{fontspec} % Open type fonts
 \RequirePackage[math-style=literal]{unicode-math} % Support unicode input
 \setmainfont{STIX Two Text} % Default Font
@@ -97,8 +101,10 @@
 \fi
 
 \ifxetex
-\RequirePackage{stoneipa}
+\RequirePackage[phoneticfontname=StoneSans-PhoneticIPA,
+alternatefontname=StoneSans-PhoneticAlternate]{stoneipa}
 \newcommand\ipa[1]{{\sipafont #1}}
+\newcommand\pho[1]{[#1]}
 \fi
 
 \RequirePackage{soul} % strike through and underline
@@ -502,7 +508,7 @@ sep=4pt, yshift =-3pt, font=\small\itshape, text height=.7em]
 \newcommand{\sem}[2][M\!,g]{\mbox{ $[\![ #2 ]\!]^{#1}$}}
 \newcommand{\cat}[1]{\ensuremath{\mathop{\mathslash{}}\limits_{\tiny #1}}}
 \newcommand{\vb}[0]{\text{\,|\,}}
-\newcommand{\arc}[2]{\overarc{$#1$$#2$}}
+\newcommand{\arc} [2] {\overarc {$#1$$#2$}}
 \fi
 \ifsyntax % Syntax Packages
 \ifpdf
@@ -530,7 +536,7 @@ sep=4pt, yshift =-3pt, font=\small\itshape, text height=.7em]
 \newcommand{\selfc}[1]{\self{#1} $🗸$}
 \newcommand{\plusf}[1]{\feature{$+$#1$+$}}
 \newcommand{\plusfc}[1]{\sout{\plusf{#1}}}
-\newcommand{\plusfs}[1]{$[$\sout{\plusfeat{#1}}$[$}
+
 % Agreement features
 \newcommand{\pagree}[1]{$[\star\pi$: #1 $*]$}
 \newcommand{\ppagree}[1]{$[\pi$: #1$]$}
@@ -546,7 +552,7 @@ sep=4pt, yshift =-3pt, font=\small\itshape, text height=.7em]
 \newcommand{\littlev}[0]{\textit{v}\xspace}
 \newcommand{\head}[1]{#1$^0$}
 \newcommand{\comp}[1]{\mbox{[Comp, #1]}}
-\newcommand{\xbar}[1]{$\overline{\textrm{#1}}$}
+\newcommand{\xbar}[1]{\overline{\textrm{#1}}}
 \newcommand{\Agree}[0]{\textsc{Agree}\xspace}
 \newcommand{\abar}[0]{\xbar{A}}
 \fi
@@ -615,8 +621,13 @@ sep=4pt, yshift =-3pt, font=\small\itshape, text height=.7em]
 }
 
 
-
-\newcommand\lingtitle[0]{\bgroup\setlength{\parindent}{0pt}\@title\egroup\\[12pt]}
+\newcommand{\formatcourse}[0]{\unless\ifx\LING@coursenumber\@empty{\textbf{\scshape
+      {\MakeLowercase{\LING@coursenumber : }}}}\fi}
+\newcommand{\formatterm}[0]{\unless\ifx\LING@courseterm\@empty{\textbf{\scshape
+      {\MakeLowercase{\LING@courseterm}}}}\fi}
+\newcommand\lingtitle[0]{\bgroup\setlength{\parindent}{0pt} \begin{tabularx}{\textwidth}{X r}{\Large
+                                                              \formatcourse\@title} & {\itshape \formatterm}
+\end{tabularx}\egroup\\[12pt]\smallskip\noindent\titlehrule[0.4mm]\begin{flushright}\@author\\\@date\\\end{flushright}\medskip}
 
 \definestyle{poole}
 \definestyle{hunter}
@@ -654,13 +665,14 @@ sep=4pt, yshift =-3pt, font=\small\itshape, text height=.7em]
     \@author & \bumfordtitle{} \\
     \ifx\emailaddr\@empty \else {\small \emaillink} \fi & \assignment
     \ifx\LING@profname\@empty \else \\ & \profname\fi
-  \end{tabularx}
+  \end{tabularx}\egroup}
 \else
 \unless\ifx\LING@coursenumber\@empty
 \g@addto@macro\bumfordtitle{\textbf{\scshape {\MakeLowercase{\LING@coursenumber}}} :
   \@title}
 \else \g@addto@macro\bumfordtitle{\@title} \fi
-\ifx\LING@profname\@empty \else \g@addto@macro\bumfordtitle{\\ \LING@profname} \fi
+\ifx\LING@profname\@empty \else \g@addto@macro\bumfordtitle{\\ \LING@profname}
+\fi
 \renewcommand{\lingtitle}{
   \bgroup\setlength{\parindent}{0pt}%
   \bumfordtitle{}\\
@@ -724,20 +736,31 @@ sep=4pt, yshift =-3pt, font=\small\itshape, text height=.7em]
 \fi
 
 \ifonlyphonetics
-\titleformat{\section}{\scshape}{\thesection}{0.6em}{#1:}
-\titlespacing{\section}{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
+\renewcommand*{\phonfeat}[2][c]{%
+ {\itshape \ensuremath{\left[\begin{tabular}{#1} #2\end{tabular}\right]}}
+}
+
+\setsansfont{StoneSans.otf}[
+  Path = /Users/jacobchaffin/Library/Fonts/ ,
+  BoldFont=StoneSans-BoldItalic.otf         ,
+  SmallCapsFont=StoneSansItcSCTOT-Semi.otf  ,
+]
+
+\titleformat{\section}[runin]{\bfseries \scshape}{\thesection}{0.6em}{#1.\,}
+% \titlespacing{\section}{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
+\rhead{\ifnum\value{page}=1 \@author \\ \ifx\LING@disnum\@empty \else Section
+  \LING@disnum \fi \else\fi}
+
+
+
+
 \renewcommand{\lingtitle}{%
   \bgroup\setlength{\parindent}{0pt}%
-  Name \underline{\hspace{4mm}\@author\hspace{2cm}}\hfill
-  {\begin{flushright}
-    \LING@coursename, \LING@quarter \\
-    \LING@profname
-  \end{flushright}}
-  \begin{center}
-    {\Large \MakeUppercase \@title} \\\medskip
-    {\textbf{This homework is due in class on \DTMDate{\@date}}}
-  \end{center}\egroup
-}
+  \textsf{%
+  \begin{tabularx}{\textwidth}{X r}
+    \textsc{\LING@coursenumber } \LING@coursename & \LING@quarter \\
+    \@title & \LING@profname
+  \end{tabularx}}\egroup}
 \fi
 
 \let\maketitle\lingtitle
